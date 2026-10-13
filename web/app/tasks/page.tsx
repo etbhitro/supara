@@ -37,7 +37,6 @@ export default function TasksPage() {
     <>
       <PageHeader
         title="Задачи"
-        subtitle="Задачи персонала по объектам"
         action={
           canAdd && (
             <button className="btn-primary" onClick={dlg.show}>

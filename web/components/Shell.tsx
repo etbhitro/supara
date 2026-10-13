@@ -13,11 +13,11 @@ interface NavItem {
 }
 
 const ALL = {
-  home: { path: "/panel/", label: "Обзор" },
-  bookings: { path: "/panel/bookings/", label: "Брони" },
-  guests: { path: "/panel/guests/", label: "Гости" },
-  tasks: { path: "/panel/tasks/", label: "Задачи" },
-  agents: { path: "/panel/agents/", label: "AI-агенты" },
+  home: { path: "/", label: "Обзор" },
+  bookings: { path: "/bookings/", label: "Брони" },
+  guests: { path: "/guests/", label: "Гости" },
+  tasks: { path: "/tasks/", label: "Задачи" },
+  agents: { path: "/agents/", label: "AI-агенты" },
 } satisfies Record<string, NavItem>;
 
 // Кто что видит (ТЗ, раздел 2). Персонал — только свои задачи.
@@ -41,7 +41,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   const body = (
     <div className="flex h-full w-[232px] flex-col bg-ink-900">
-      <Link href="/" className="block px-5 pb-4 pt-6" aria-label="О платформе">
+      <Link href="/" className="block px-5 pb-4 pt-6" aria-label="Обзор">
         <BrandLockup />
       </Link>
       <div className="mx-5 h-px bg-white/[0.06]" />
@@ -86,9 +86,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <RotateCcw size={13} />
           Сбросить данные
         </button>
-        <Link href="/" className="mt-3 block text-center text-xs font-semibold text-muted-200 hover:text-accent-300">
-          ← О платформе
-        </Link>
+        <a
+          href="https://commons.wikimedia.org/wiki/File:Chunkurchak_pano_view.jpg"
+          target="_blank"
+          rel="noopener"
+          className="mt-3 block text-center text-[10px] text-muted-400 hover:text-muted-200"
+        >
+          Фото: Vilya Shoni · CC BY-SA 4.0
+        </a>
       </div>
     </div>
   );

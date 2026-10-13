@@ -25,7 +25,7 @@ export default function GuestsPage() {
 
   return (
     <>
-      <PageHeader title="Гости" subtitle="Карточки гостей: контакты, визиты, откуда пришли" />
+      <PageHeader title="Гости" />
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Поиск по имени или телефону" className={`${inputCls} mb-4 max-w-xs`} />
 
       {rows.length === 0 ? (

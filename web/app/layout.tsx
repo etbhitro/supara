@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant, Manrope } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
+import { StoreProvider } from "@/lib/store";
+import { Shell } from "@/components/Shell";
 
 const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
@@ -8,16 +10,8 @@ const manrope = Manrope({
   display: "swap",
 });
 
-// Заголовки лендинга: антиква с кириллицей.
-const display = Cormorant({
-  subsets: ["latin", "cyrillic"],
-  weight: ["500", "600", "700"],
-  variable: "--font-display",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "Супара — цифровой управляющий",
+  title: "Супара",
   description: "Платформа управления центром отдыха «Супара»: AI-агенты читают Битрикс24, брони и кассу, присылают сводку и советы владельцу.",
   // Демо с вымышленными данными: в поиск не отдаём.
   robots: { index: false, follow: false },
@@ -31,9 +25,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${manrope.variable} ${display.variable}`}>
+    <html lang="ru" className={manrope.variable}>
       <body className="min-h-screen bg-ink font-sans antialiased">
-        {children}
+        <StoreProvider>
+          <Shell>{children}</Shell>
+        </StoreProvider>
       </body>
     </html>
   );

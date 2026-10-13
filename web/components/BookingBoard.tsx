@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { Cell, Dialog, EmptyState, Field, NoAccess, Row, Table, inputCls } from "@/components/DataShell";
+import { Cell, Dialog, EmptyState, Field, Row, Table, inputCls } from "@/components/DataShell";
 import { addDays, formatRange, formatSom, fromISO, isWeekend, nightsBetween, todayISO, weekday } from "@/lib/format";
 import {
   SOURCES,
@@ -40,7 +39,7 @@ interface Draft {
   to: string;
 }
 
-export default function BookingsPage() {
+export function BookingBoard({ showRequests = false }: { showRequests?: boolean }) {
   const { state, update } = useStore();
   const today = todayISO();
   const [start, setStart] = useState(addDays(today, -2));
@@ -54,21 +53,8 @@ export default function BookingsPage() {
   const requests = state.bookings.filter((b) => b.status === "request");
   const opened = state.bookings.find((b) => b.id === openId) ?? null;
 
-  if (state.role === "staff") return <NoAccess what="Брони" />;
-
   return (
     <>
-      <PageHeader
-        title="Брони"
-        subtitle="Супара-Чункурчак · шахматка занятости"
-        action={
-          <button className="btn-primary" onClick={() => setDraft({ unitId: state.units[0].id, from: today, to: addDays(today, 1) })}>
-            <Plus size={16} />
-            Новая бронь
-          </button>
-        }
-      />
-
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <button className="btn-ghost" onClick={() => setStart(addDays(start, -7))} aria-label="Неделя назад">
           <ChevronLeft size={14} />
@@ -79,16 +65,20 @@ export default function BookingsPage() {
         <button className="btn-ghost" onClick={() => setStart(addDays(start, 7))} aria-label="Неделя вперёд">
           <ChevronRight size={14} />
         </button>
-        <div className="ml-auto flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {(["request", "confirmed", "checked_in", "checked_out"] as BookingStatus[]).map((s) => (
             <span key={s} className={`chip ${STATUS_CHIP[s]}`}>
               {STATUS_LABEL[s]}
             </span>
           ))}
         </div>
+        <button className="btn-primary ml-auto py-2" onClick={() => setDraft({ unitId: state.units[0].id, from: today, to: addDays(today, 1) })}>
+          <Plus size={16} />
+          Бронь
+        </button>
       </div>
 
-      <div className="mb-8 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.03]">
+      <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.03]">
         <div className="grid min-w-[980px]" style={{ gridTemplateColumns: `132px repeat(${DAYS}, minmax(58px, 1fr))` }}>
           <div className="sticky left-0 z-10 border-b border-white/10 bg-ink-800 px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-muted-200">
             Объект
@@ -143,9 +133,9 @@ export default function BookingsPage() {
         </div>
       </div>
 
-      <h2 className="mb-3 text-base font-bold text-stone-50">Заявки, ждут подтверждения</h2>
-      {requests.length === 0 ? (
-        <EmptyState title="Новых заявок нет" hint="Заявки из гостевого бота появятся здесь." />
+      {showRequests && <h2 className="mb-3 mt-8 text-base font-bold text-stone-50">Заявки</h2>}
+      {!showRequests ? null : requests.length === 0 ? (
+        <EmptyState title="Новых заявок нет" />
       ) : (
         <Table headers={["Гость", "Объект", "Даты", "Сумма", "Источник", ""]}>
           {requests.map((b) => (
@@ -345,9 +335,6 @@ function BookingCard({
           </button>
         )}
       </div>
-      {booking.status === "checked_in" && (
-        <div className="mt-3 text-xs text-muted-300">При выселении агент по операциям сам поставит задачу на уборку.</div>
-      )}
     </div>
   );
 }

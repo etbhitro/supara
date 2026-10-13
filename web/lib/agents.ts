@@ -318,8 +318,8 @@ export function adviceFor(state: State): Advice[] {
     const regulars = state.guests.filter((g) => g.tags.includes("постоянный")).length;
     out.push({
       tone: "money",
-      title: `На субботу ${formatDay(saturday)} свободно ${free} из ${state.units.length}`,
-      text: `Это потерянная выручка выходного дня. В базе ${regulars} постоянных гостей — отправьте им предложение на эти выходные.`,
+      title: `Суббота ${formatDay(saturday)}: свободно ${free} из ${state.units.length}`,
+      text: `Разослать предложение постоянным гостям (${regulars}).`,
     });
   }
 
@@ -328,8 +328,8 @@ export function adviceFor(state: State): Advice[] {
     const sum = soon.reduce((s, b) => s + (b.total - b.paid), 0);
     out.push({
       tone: "money",
-      title: `До заезда не внесён остаток: ${formatSom(sum)}`,
-      text: `Заезды в ближайшие два дня: ${soon.map((b) => unitName(b.unitId)).join(", ")}. Напомните гостям об оплате до приезда.`,
+      title: `Не внесён остаток: ${formatSom(sum)}`,
+      text: `${soon.map((b) => unitName(b.unitId)).join(", ")} — напомнить до заезда.`,
     });
   }
 
@@ -338,7 +338,7 @@ export function adviceFor(state: State): Advice[] {
     out.push({
       tone: "warn",
       title: `Заявок без ответа: ${requests.length}`,
-      text: "Гость ждёт подтверждения. Позвоните или подтвердите бронь сегодня, пока он не выбрал другое место.",
+      text: "Подтвердить или позвонить сегодня.",
     });
   }
 
@@ -347,7 +347,7 @@ export function adviceFor(state: State): Advice[] {
     out.push({
       tone: "warn",
       title: `Просроченных задач: ${overdue.length}`,
-      text: `Например: «${overdue[0].title}». Пока задача не закрыта, объект нельзя заселять.`,
+      text: overdue[0].title,
     });
   }
 
@@ -357,8 +357,8 @@ export function adviceFor(state: State): Advice[] {
   if (top && active.length >= 5) {
     out.push({
       tone: "idea",
-      title: `Главный источник броней: ${top[0]}`,
-      text: `${top[1]} из ${active.length} броней пришли оттуда. Стоит усилить этот канал и проверить, почему остальные дают меньше.`,
+      title: `Главный источник: ${top[0]}`,
+      text: `${top[1]} из ${active.length} броней.`,
     });
   }
 
