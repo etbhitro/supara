@@ -85,6 +85,31 @@ export interface Campaign {
   audience: number;
 }
 
+// Что координатор разворачивает в ответ на запрос владельца.
+export type View =
+  | { kind: "summary" }
+  | { kind: "board" }
+  | { kind: "requests" }
+  | { kind: "tasks" }
+  | { kind: "money" }
+  | { kind: "free"; from: string; to: string }
+  | { kind: "team" }
+  | { kind: "funnel" }
+  | { kind: "marketing" }
+  | { kind: "market" }
+  | { kind: "sales" }
+  | { kind: "advice" }
+  | { kind: "guests" }
+  | { kind: "guestbot" };
+
+// Реплика в разговоре с координатором.
+export interface ThreadMessage {
+  id: string;
+  from: "me" | "bot";
+  text: string;
+  view?: View;
+}
+
 // Что гостевой бот уже выяснил в текущем диалоге.
 export interface ChatSession {
   from?: string;
@@ -104,7 +129,7 @@ export interface State {
   logs: AgentLog[];
   chat: ChatMessage[];
   session: ChatSession;
-  ownerChat: ChatMessage[];
+  thread: ThreadMessage[];
   reminders: Reminder[];
   campaigns: Campaign[];
 }
@@ -229,7 +254,7 @@ function seed(today: string): State {
       { id: "c0", from: "bot", text: "Саламатсызбы! Я бот центра отдыха «Супара-Чункурчак». Подскажу цены, проверю свободные даты и приму заявку на бронь." },
     ],
     session: {},
-    ownerChat: [{ id: "o0", from: "bot", text: "На связи. Что посмотреть?" }],
+    thread: [],
     reminders: [],
     campaigns: [],
   };
@@ -337,7 +362,7 @@ export function addPayment(state: State, bookingId: string, amount: number): Sta
   };
 }
 
-const KEY = "supara-mvp-v4";
+const KEY = "supara-mvp-v5";
 
 interface Store {
   state: State;
@@ -382,7 +407,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => (state ? { state, update, reset } : null), [state, update, reset]);
 
   if (!value) {
-    return <div className="grid min-h-screen place-items-center text-sm text-muted-200">Загрузка…</div>;
+    return <div className="min-h-screen" />;
   }
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

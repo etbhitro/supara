@@ -75,7 +75,7 @@ function dateFor(day: number, month: number | undefined, today: string): string 
   return toISO(d);
 }
 
-function parseDates(text: string, today: string): { from: string; to: string } | undefined {
+export function parseDates(text: string, today: string): { from: string; to: string } | undefined {
   const range = text.match(/(\d{1,2})\s*(?:-|–|—|по|до)\s*(\d{1,2})(?:\.(\d{1,2}))?/);
   if (range) {
     const month = range[3] ? Number(range[3]) - 1 : monthFromText(text);
@@ -442,57 +442,6 @@ export function operationsRound(state: State): State {
   const parts = [`поставил задач: ${created}`, `просрочено: ${overdue.length}`];
   if (overdue.length) parts.push(`сообщил управляющему: «${overdue[0].title}»`);
   return log(next, "operations", `Обход — ${parts.join(", ")}.`);
-}
-
-// ---------- Координатор ----------
-// Отвечает владельцу на вопросы по данным.
-
-export function ownerReply(state: State, raw: string): string {
-  const text = raw.toLowerCase().replace(/ё/g, "е");
-  const today = todayISO();
-  const s = summarize(state);
-
-  if (/совет|делать|внимани|проблем/.test(text)) {
-    const adv = adviceFor(state);
-    return adv.length ? adv.map((a) => `• ${a.title}. ${a.text}`).join("\n") : "Всё по плану.";
-  }
-  if (/заработ|выручк|оплач|оплат|деньг|доход|долг|доплат/.test(text)) {
-    return `Получено оплат: ${formatSom(s.paidTotal)}. К доплате: ${formatSom(s.dueTotal)}.`;
-  }
-  if (/задач|просроч/.test(text)) {
-    const open = state.tasks.filter((t) => !t.done);
-    const overdue = open.filter((t) => t.due < today);
-    const list = overdue.map((t) => `• ${t.title} (${t.assignee})`).join("\n");
-    return `Открыто задач: ${open.length}, просрочено: ${overdue.length}.${list ? `\n${list}` : ""}`;
-  }
-  if (/заявк/.test(text)) {
-    const q = salesQueue(state).filter((i) => i.kind === "request");
-    if (!q.length) return "Заявок без подтверждения нет.";
-    return `Заявок без подтверждения: ${q.length}.\n${q.map((i) => `• ${i.guest}: ${i.unit}, ${formatRange(i.booking.from, i.booking.to)}`).join("\n")}`;
-  }
-  if (/заезд|выезд|заезжа|выезжа/.test(text)) {
-    const a = s.arrivals.map((x) => `${x.unit} (${x.guest})`).join(", ") || "нет";
-    const d = s.departures.map((x) => `${x.unit} (${x.guest})`).join(", ") || "нет";
-    return `Заезды: ${a}.\nВыезды: ${d}.`;
-  }
-  if (/гост|постоянн|клиент/.test(text)) {
-    const regulars = state.guests.filter((g) => g.tags.includes("постоянный")).length;
-    return `Гостей в базе: ${state.guests.length}, постоянных: ${regulars}.`;
-  }
-  if (/загруз|занят/.test(text)) {
-    return `Сегодня занято ${s.occupiedToday} из ${s.total}. Загрузка на 7 дней: ${Math.round(s.occupancyWeek * 100)}%.`;
-  }
-  const dates = parseDates(text, today);
-  if (/свобод|мест/.test(text) || dates) {
-    const from = dates?.from ?? today;
-    const to = dates?.to ?? addDays(today, 1);
-    const free = freeUnits(state, from, to);
-    const byKind = new Map<string, number>();
-    for (const u of free) byKind.set(u.kind, (byKind.get(u.kind) ?? 0) + 1);
-    const list = [...byKind.entries()].map(([k, n]) => `${k}: ${n}`).join(", ");
-    return `${formatRange(from, to)} свободно ${free.length} из ${state.units.length}${list ? ` (${list})` : ""}.`;
-  }
-  return morningReport(state, true);
 }
 
 // ---------- Маркетолог ----------

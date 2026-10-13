@@ -12,7 +12,7 @@ export function Table({ headers, children }: { headers: string[]; children: Reac
               {headers.map((h) => (
                 <th
                   key={h}
-                  className="whitespace-nowrap px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.08em] text-muted-200"
+                  className="whitespace-nowrap px-4 py-3 text-left text-[11px] font-medium text-muted-200"
                 >
                   {h}
                 </th>
@@ -65,9 +65,9 @@ export function Dialog({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 max-h-[92vh] w-full max-w-md animate-fade-in overflow-y-auto rounded-2xl border border-white/10 bg-ink-800 p-6 shadow-2xl">
+      <div className="relative z-10 max-h-[92vh] w-full max-w-md animate-fade-in overflow-y-auto rounded-[28px] bg-ink-700 p-6 shadow-2xl ring-1 ring-inset ring-white/10">
         <div className="mb-5 flex items-center justify-between gap-3">
-          <div className="text-base font-bold text-stone-50">{title}</div>
+          <div className="text-lg font-medium text-stone-50">{title}</div>
           <button
             onClick={onClose}
             className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-muted-200 hover:bg-white/5 hover:text-stone-100"
@@ -97,7 +97,7 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 }
 
 export const inputCls =
-  "w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-stone-100 placeholder:text-muted-300 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 [color-scheme:dark]";
+  "w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-stone-100 placeholder:text-muted-300 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 [color-scheme:dark]";
 
 export function NoAccess({ what }: { what: string }) {
   return <EmptyState title={`Для этой роли раздел «${what}» закрыт`} hint="Смените роль в меню, чтобы посмотреть." />;

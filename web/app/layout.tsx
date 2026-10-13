@@ -1,35 +1,30 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope } from "next/font/google";
+import { Onest } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store";
-import { Shell } from "@/components/Shell";
 
-const manrope = Manrope({
+const onest = Onest({
   subsets: ["latin", "cyrillic"],
-  variable: "--font-manrope",
+  variable: "--font-onest",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Супара",
-  description: "Платформа управления центром отдыха «Супара»: AI-агенты читают Битрикс24, брони и кассу, присылают сводку и советы владельцу.",
-  // Демо с вымышленными данными: в поиск не отдаём.
   robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1A130E",
+  themeColor: "#0B0B0C",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={manrope.variable}>
+    <html lang="ru" className={onest.variable}>
       <body className="min-h-screen bg-ink font-sans antialiased">
-        <StoreProvider>
-          <Shell>{children}</Shell>
-        </StoreProvider>
+        <StoreProvider>{children}</StoreProvider>
       </body>
     </html>
   );

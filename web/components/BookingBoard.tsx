@@ -33,7 +33,7 @@ const STATUS_CHIP: Record<BookingStatus, string> = {
   cancelled: "bg-felt/30 text-red-200",
 };
 
-interface Draft {
+export interface Draft {
   unitId: string;
   from: string;
   to: string;
@@ -78,27 +78,27 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.03]">
+      <div className="overflow-x-auto rounded-2xl bg-ink-700/60 ring-1 ring-inset ring-white/[0.06]">
         <div className="grid min-w-[980px]" style={{ gridTemplateColumns: `132px repeat(${DAYS}, minmax(58px, 1fr))` }}>
-          <div className="sticky left-0 z-10 border-b border-white/10 bg-ink-800 px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-muted-200">
+          <div className="sticky left-0 z-10 border-b border-white/10 bg-ink-700 px-3 py-2 text-xs font-medium text-muted-200">
             Объект
           </div>
           {days.map((d) => (
             <div
               key={d}
               className={`border-b border-l border-white/10 px-1 py-2 text-center text-[11px] leading-tight ${
-                d === today ? "bg-accent/20 font-bold text-accent-300" : isWeekend(d) ? "bg-white/[0.04] text-stone-200" : "text-muted-200"
+                d === today ? "bg-accent/15 font-medium text-accent-300" : isWeekend(d) ? "bg-white/[0.04] text-stone-200" : "text-muted-200"
               }`}
             >
-              <div className="font-bold">{fromISO(d).getDate()}</div>
+              <div className="font-medium">{fromISO(d).getDate()}</div>
               <div>{weekday(d)}</div>
             </div>
           ))}
 
           {state.units.map((u) => (
             <div key={u.id} className="contents">
-              <div className="sticky left-0 z-10 border-b border-white/5 bg-ink-800 px-3 py-2">
-                <div className="text-sm font-semibold text-stone-100">{u.name}</div>
+              <div className="sticky left-0 z-10 border-b border-white/5 bg-ink-700 px-3 py-2">
+                <div className="text-sm font-medium text-stone-100">{u.name}</div>
                 <div className="text-[10px] text-muted-300">
                   до {u.capacity} чел. · {u.price.toLocaleString("ru-RU")}
                 </div>
@@ -120,7 +120,7 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
                   <button
                     key={d}
                     onClick={() => setOpenId(b.id)}
-                    className={`overflow-hidden border-y px-1.5 text-left text-[11px] font-semibold ${STATUS_CELL[b.status]} ${
+                    className={`overflow-hidden border-y px-1.5 text-left text-[11px] font-medium ${STATUS_CELL[b.status]} ${
                       b.from === d ? "ml-1 rounded-l-lg border-l" : ""
                     } ${addDays(b.to, -1) === d ? "mr-1 rounded-r-lg border-r" : ""} my-1`}
                   >
@@ -169,7 +169,7 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
   );
 }
 
-function NewBookingDialog({ draft, onClose }: { draft: Draft; onClose: () => void }) {
+export function NewBookingDialog({ draft, onClose }: { draft: Draft; onClose: () => void }) {
   const { state, update } = useStore();
   const [unitId, setUnitId] = useState(draft.unitId);
   const [from, setFrom] = useState(draft.from);

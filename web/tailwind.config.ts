@@ -5,50 +5,49 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Тёплый тёмный фон — войлок и дерево юрты.
+        // Нейтральный графит: поверхности различаются светлотой, а не рамками.
         ink: {
-          DEFAULT: "#1A130E",
-          900: "#1A130E",
-          800: "#231A13",
-          700: "#2E2219",
-          600: "#3A2C20",
+          DEFAULT: "#0B0B0C",
+          900: "#0B0B0C",
+          800: "#131315",
+          700: "#1A1A1D",
+          600: "#232327",
         },
-        // Акцент — охра орнамента.
+        // Единственный акцент — тёплое шампанское, только для важного.
         accent: {
-          DEFAULT: "#D9A441",
-          100: "#F6E7C4",
-          300: "#EBC679",
-          400: "#E2B55C",
-          500: "#D9A441",
-          600: "#BC8A2D",
-          700: "#946C22",
+          DEFAULT: "#E6CFA0",
+          100: "#F6EEDD",
+          300: "#EEDDB9",
+          400: "#E9D4AA",
+          500: "#E6CFA0",
+          600: "#D9BE86",
+          700: "#7D6C48",
         },
-        felt: "#B4472E",
+        felt: "#D9644A",
         muted: {
-          DEFAULT: "#B5A898",
-          100: "#D6CCBF",
-          200: "#B5A898",
-          300: "#8E8172",
-          400: "#6E6255",
+          DEFAULT: "#9A9AA2",
+          100: "#C9C9CE",
+          200: "#9A9AA2",
+          300: "#6F6F78",
+          400: "#4A4A52",
         },
       },
       fontFamily: {
-        sans: ["var(--font-manrope)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "Georgia", "serif"],
-      },
-      boxShadow: {
-        "glow-sm": "0 4px 16px rgba(217, 164, 65, 0.28)",
+        sans: ["var(--font-onest)", "system-ui", "sans-serif"],
       },
       keyframes: {
         "fade-in": {
           "0%": { opacity: "0", transform: "translateY(4px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        rise: {
+          "0%": { opacity: "0", transform: "translateY(14px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
-        "fade-in": "fade-in 0.3s ease-out",
-        "rise": "fade-in 0.9s ease-out both",
-        "spin-slow": "spin 90s linear infinite",
+        "fade-in": "fade-in 0.25s ease-out",
+        rise: "rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both",
       },
     },
   },
