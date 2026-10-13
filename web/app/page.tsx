@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Plus } from "lucide-react";
+import { ArrowUp, X } from "lucide-react";
 import { BrandMark } from "@/components/Brand";
 import { NowLine } from "@/components/live";
 import { AskContext, ViewCard } from "@/components/views";
@@ -30,14 +30,25 @@ function greeting(): string {
 export default function Home() {
   const { state, update } = useStore();
   const [text, setText] = useState("");
-  const lastRef = useRef<HTMLDivElement>(null);
   const thread = state.thread;
   const empty = thread.length === 0;
-  const scene = sceneOf(thread[thread.length - 1]?.view);
+  // На экране всегда один ответ: новый запрос заменяет предыдущий, а не уезжает вверх.
+  const question = thread.find((m) => m.from === "me");
+  const answer = thread.find((m) => m.from === "bot");
+  const scene = sceneOf(answer?.view);
 
+  function close() {
+    update((s) => ({ ...s, thread: [] }));
+  }
+
+  // Esc закрывает открытый ответ
   useEffect(() => {
-    lastRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [thread.length]);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") update((s) => (s.thread.length ? { ...s, thread: [] } : s));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [update]);
 
   // Ссылка вида /?q=Сводка сразу открывает ответ.
   const linked = useRef(false);
@@ -59,10 +70,11 @@ export default function Home() {
       const reply = route(s, clean);
       return {
         ...s,
-        thread: [...s.thread, { id: uid("q"), from: "me", text: clean }, { id: uid("a"), from: "bot", text: reply.text, view: reply.view }],
+        thread: [{ id: uid("q"), from: "me", text: clean }, { id: uid("a"), from: "bot", text: reply.text, view: reply.view }],
       };
     });
     setText("");
+    window.scrollTo(0, 0);
   }
 
   return (
@@ -84,12 +96,6 @@ export default function Home() {
           <BrandMark />
           <span className="font-display text-xl text-ink">Супара</span>
         </div>
-        {!empty && (
-          <button className="btn-ghost" onClick={() => update((s) => ({ ...s, thread: [] }))}>
-            <Plus size={14} />
-            Новый запрос
-          </button>
-        )}
       </header>
 
       <main className="mx-auto flex min-h-screen w-full max-w-[54rem] flex-col px-4 pb-52 pt-24 md:px-6">
@@ -100,24 +106,19 @@ export default function Home() {
             <NowLine />
           </div>
         ) : (
-          <div className="space-y-8">
-            {thread.map((m, i) => {
-              const isLastQuestion = m.from === "me" && i === thread.length - 2;
-              if (m.from === "me") {
-                return (
-                  <div key={m.id} ref={isLastQuestion ? lastRef : undefined} className="flex scroll-mt-24 justify-end">
-                    <div className="max-w-[85%] rounded-full border border-bronze/25 bg-bronze/15 px-6 py-2.5 text-[17px] text-ink backdrop-blur-xl">{m.text}</div>
-                  </div>
-                );
-              }
-              return (
-                <div key={m.id} className="space-y-4">
-                  <p className="animate-rise font-display text-[1.75rem] leading-snug text-ink">{m.text}</p>
-                  {m.view && <ViewCard view={m.view} />}
-                </div>
-              );
-            })}
-          </div>
+          answer && (
+            // key: при новом запросе карточка создаётся заново, старая исчезает сразу
+            <div key={answer.id} className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <span className="rounded-full border border-bronze/25 bg-bronze/15 px-5 py-2 text-[15px] text-ink backdrop-blur-xl">{question?.text}</span>
+                <button onClick={close} aria-label="Закрыть" title="Закрыть" className="btn-ghost h-11 w-11 shrink-0 p-0">
+                  <X size={18} />
+                </button>
+              </div>
+              <p className="animate-rise font-display text-[1.75rem] leading-snug text-ink">{answer.text}</p>
+              {answer.view && <ViewCard view={answer.view} />}
+            </div>
+          )
         )}
       </main>
 
