@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   basePath: onPages ? "/supara" : "",
   trailingSlash: true,
   images: { unoptimized: true },
+  // Для обычных <img>: Next сам подставляет basePath только в свои ссылки.
+  env: { NEXT_PUBLIC_BASE: onPages ? "/supara" : "" },
 };
 
 export default nextConfig;

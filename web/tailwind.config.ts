@@ -34,6 +34,7 @@ export default {
       },
       fontFamily: {
         sans: ["var(--font-manrope)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
       },
       boxShadow: {
         "glow-sm": "0 4px 16px rgba(217, 164, 65, 0.28)",
@@ -46,6 +47,8 @@ export default {
       },
       animation: {
         "fade-in": "fade-in 0.3s ease-out",
+        "rise": "fade-in 0.9s ease-out both",
+        "spin-slow": "spin 90s linear infinite",
       },
     },
   },

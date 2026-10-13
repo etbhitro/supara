@@ -13,11 +13,11 @@ interface NavItem {
 }
 
 const ALL = {
-  home: { path: "/", label: "Обзор" },
-  bookings: { path: "/bookings/", label: "Брони" },
-  guests: { path: "/guests/", label: "Гости" },
-  tasks: { path: "/tasks/", label: "Задачи" },
-  agents: { path: "/agents/", label: "AI-агенты" },
+  home: { path: "/demo/", label: "Обзор" },
+  bookings: { path: "/demo/bookings/", label: "Брони" },
+  guests: { path: "/demo/guests/", label: "Гости" },
+  tasks: { path: "/demo/tasks/", label: "Задачи" },
+  agents: { path: "/demo/agents/", label: "AI-агенты" },
 } satisfies Record<string, NavItem>;
 
 // Кто что видит (ТЗ, раздел 2). Персонал — только свои задачи.
@@ -41,9 +41,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   const body = (
     <div className="flex h-full w-[232px] flex-col bg-ink-900">
-      <div className="px-5 pb-4 pt-6">
+      <Link href="/" className="block px-5 pb-4 pt-6" aria-label="О платформе">
         <BrandLockup />
-      </div>
+      </Link>
       <div className="mx-5 h-px bg-white/[0.06]" />
 
       <nav className="flex-1 overflow-y-auto px-3 py-3">
@@ -86,6 +86,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <RotateCcw size={13} />
           Сбросить демо-данные
         </button>
+        <Link href="/" className="mt-3 block text-center text-xs font-semibold text-muted-200 hover:text-accent-300">
+          ← О платформе
+        </Link>
       </div>
     </div>
   );

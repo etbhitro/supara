@@ -28,6 +28,11 @@
 }
 
 @layer components {
+  /* У антиквы по умолчанию «строчные» цифры: 0 похож на букву о. */
+  .font-display {
+    font-variant-numeric: lining-nums;
+  }
+
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent-600 px-4 py-2.5 text-sm font-semibold text-ink-900 shadow-glow-sm transition hover:bg-accent-500 disabled:cursor-not-allowed disabled:opacity-60;
   }

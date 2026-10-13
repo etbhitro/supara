@@ -294,3 +294,73 @@ export function morningReport(state: State, showMoney: boolean): string {
   lines.push(attention.length ? `Требует внимания: ${attention.join(", ")}.` : "Всё идёт по плану.");
   return lines.join("\n");
 }
+
+// ---------- Советы ----------
+// Агент не только пересказывает цифры, но и говорит, что с ними делать.
+
+export interface Advice {
+  tone: "money" | "warn" | "idea";
+  title: string;
+  text: string;
+}
+
+export function adviceFor(state: State): Advice[] {
+  const today = todayISO();
+  const out: Advice[] = [];
+  const active = state.bookings.filter((b) => b.status !== "cancelled" && b.status !== "request");
+  const unitName = (id: string) => state.units.find((u) => u.id === id)?.name ?? "объект";
+
+  // Ближайшая суббота: сколько объектов простаивает.
+  const saturday = addDays(today, (6 - fromISO(today).getDay() + 7) % 7);
+  const busy = active.filter((b) => b.from <= saturday && saturday < b.to).length;
+  const free = state.units.length - busy;
+  if (free / Math.max(1, state.units.length) >= 0.4) {
+    const regulars = state.guests.filter((g) => g.tags.includes("постоянный")).length;
+    out.push({
+      tone: "money",
+      title: `На субботу ${formatDay(saturday)} свободно ${free} из ${state.units.length}`,
+      text: `Это потерянная выручка выходного дня. В базе ${regulars} постоянных гостей — отправьте им предложение на эти выходные.`,
+    });
+  }
+
+  const soon = active.filter((b) => b.status === "confirmed" && b.from <= addDays(today, 2) && b.paid < b.total);
+  if (soon.length) {
+    const sum = soon.reduce((s, b) => s + (b.total - b.paid), 0);
+    out.push({
+      tone: "money",
+      title: `До заезда не внесён остаток: ${formatSom(sum)}`,
+      text: `Заезды в ближайшие два дня: ${soon.map((b) => unitName(b.unitId)).join(", ")}. Напомните гостям об оплате до приезда.`,
+    });
+  }
+
+  const requests = state.bookings.filter((b) => b.status === "request");
+  if (requests.length) {
+    out.push({
+      tone: "warn",
+      title: `Заявок без ответа: ${requests.length}`,
+      text: "Гость ждёт подтверждения. Позвоните или подтвердите бронь сегодня, пока он не выбрал другое место.",
+    });
+  }
+
+  const overdue = state.tasks.filter((t) => !t.done && t.due < today);
+  if (overdue.length) {
+    out.push({
+      tone: "warn",
+      title: `Просроченных задач: ${overdue.length}`,
+      text: `Например: «${overdue[0].title}». Пока задача не закрыта, объект нельзя заселять.`,
+    });
+  }
+
+  const bySource = new Map<string, number>();
+  for (const b of active) bySource.set(b.source, (bySource.get(b.source) ?? 0) + 1);
+  const top = [...bySource.entries()].sort((a, b) => b[1] - a[1])[0];
+  if (top && active.length >= 5) {
+    out.push({
+      tone: "idea",
+      title: `Главный источник броней: ${top[0]}`,
+      text: `${top[1]} из ${active.length} броней пришли оттуда. Стоит усилить этот канал и проверить, почему остальные дают меньше.`,
+    });
+  }
+
+  return out.slice(0, 4);
+}
