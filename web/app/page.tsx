@@ -94,8 +94,8 @@ export default function Home() {
       <main className="mx-auto flex min-h-screen w-full max-w-[54rem] flex-col px-4 pb-48 pt-24 md:px-6">
         {empty ? (
           <div className="flex flex-1 flex-col items-center justify-center pb-10 text-center">
-            <h1 className="animate-rise font-display text-[clamp(3rem,8.5vw,5rem)] leading-[1.05] text-ink">{greeting()}</h1>
-            <p className="mt-5 animate-rise text-lg text-muted-100 [animation-delay:80ms]">{statusLine(state)}</p>
+            <h1 className="animate-rise font-display text-[clamp(3rem,8.5vw,5rem)] leading-[1.05] text-ink [animation-duration:1100ms]">{greeting()}</h1>
+            <p className="mt-5 animate-rise text-lg text-muted-100 [animation-delay:900ms]">{statusLine(state)}</p>
           </div>
         ) : (
           <div className="space-y-8">
@@ -120,7 +120,7 @@ export default function Home() {
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-30 bg-gradient-to-t from-paper via-paper/95 to-transparent px-4 pb-3 pt-10 md:px-6">
-        <div className="mx-auto w-full max-w-[54rem]">
+        <div className={`mx-auto w-full max-w-[54rem] ${empty ? "animate-rise [animation-delay:1500ms]" : ""}`}>
           <div className="mb-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] md:flex-wrap md:justify-center">
             {PROMPTS.map((p) => (
               <button key={p} onClick={() => ask(p)} className="btn-ghost shrink-0 px-4 py-2 text-sm">

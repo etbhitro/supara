@@ -461,7 +461,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
     // Нетронутое демо пересоздаём каждый день, чтобы даты не устаревали.
     if (!loaded || (!loaded.touched && loaded.seedDate !== today)) loaded = seed(today);
-    setState(loaded);
+    // Каждый вход начинается с приветствия: прошлый разговор не показываем.
+    setState({ ...loaded, thread: [] });
   }, []);
 
   useEffect(() => {
