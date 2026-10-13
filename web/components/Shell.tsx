@@ -13,11 +13,11 @@ interface NavItem {
 }
 
 const ALL = {
-  home: { path: "/demo/", label: "Обзор" },
-  bookings: { path: "/demo/bookings/", label: "Брони" },
-  guests: { path: "/demo/guests/", label: "Гости" },
-  tasks: { path: "/demo/tasks/", label: "Задачи" },
-  agents: { path: "/demo/agents/", label: "AI-агенты" },
+  home: { path: "/panel/", label: "Обзор" },
+  bookings: { path: "/panel/bookings/", label: "Брони" },
+  guests: { path: "/panel/guests/", label: "Гости" },
+  tasks: { path: "/panel/tasks/", label: "Задачи" },
+  agents: { path: "/panel/agents/", label: "AI-агенты" },
 } satisfies Record<string, NavItem>;
 
 // Кто что видит (ТЗ, раздел 2). Персонал — только свои задачи.
@@ -84,7 +84,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </label>
         <button onClick={reset} className="btn-ghost mt-3 w-full">
           <RotateCcw size={13} />
-          Сбросить демо-данные
+          Сбросить данные
         </button>
         <Link href="/" className="mt-3 block text-center text-xs font-semibold text-muted-200 hover:text-accent-300">
           ← О платформе
@@ -116,9 +116,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
       )}
 
       <main className="min-h-screen pt-14 md:ml-[232px] md:pt-0">
-        <div className="border-b border-accent/20 bg-accent/10 px-4 py-2 text-xs font-medium text-accent-300 md:px-9">
-          Демо-версия. Гости, брони и цены вымышленные, данные хранятся только в вашем браузере.
-        </div>
         <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-9 md:py-9">{children}</div>
       </main>
     </div>

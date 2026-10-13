@@ -33,18 +33,13 @@ export default function AgentsPage() {
 
   return (
     <>
-      <PageHeader title="AI-агенты" subtitle="Три агента работают в демо, остальные подключаются по этапам" />
-
-      <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-relaxed text-muted-100">
-        В демо агенты работают по правилам, без нейросети: сайт размещён без сервера. Когда появится сервер, их заменят агенты на
-        Claude — с теми же правами и тем же журналом действий.
-      </div>
+      <PageHeader title="AI-агенты" subtitle="Гостевой бот, операции и аналитика" />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="card flex h-[560px] flex-col p-0">
           <div className="border-b border-white/10 px-5 py-3">
             <div className="card-title">Гостевой бот</div>
-            <div className="text-xs text-muted-200">Так гость будет писать в Telegram. Попробуйте оставить заявку.</div>
+            <div className="text-xs text-muted-200">Диалог с гостем</div>
           </div>
           <div className="flex-1 space-y-2 overflow-y-auto px-4 py-4">
             {state.chat.map((m) => (
@@ -108,15 +103,13 @@ export default function AgentsPage() {
           <div className="card">
             <div className="card-title mb-3">Команда агентов</div>
             <ul className="space-y-3">
-              {AGENTS.map((a) => (
+              {AGENTS.filter((a) => a.live).map((a) => (
                 <li key={a.id} className="flex items-start justify-between gap-3">
-                  <div className={a.live ? "" : "opacity-60"}>
+                  <div>
                     <div className="text-sm font-semibold text-stone-100">{a.name}</div>
                     <div className="text-xs leading-relaxed text-muted-200">{a.does}</div>
                   </div>
-                  <span className={`chip mt-0.5 ${a.live ? "bg-emerald-500/15 text-emerald-300" : "bg-white/10 text-muted-200"}`}>
-                    {a.live ? "В демо" : "Позже"}
-                  </span>
+                  <span className="chip mt-0.5 bg-emerald-500/15 text-emerald-300">Работает</span>
                 </li>
               ))}
             </ul>

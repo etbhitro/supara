@@ -13,7 +13,6 @@ const OUTPUTS = [
   { icon: ClipboardCheck, title: "Задачи персоналу", text: "Уборка, подготовка, закупка — с контролем срока" },
 ];
 
-// Примеры: так выглядят советы на демо-данных.
 const ADVICE = [
   { tag: "Деньги", title: "На субботу свободно 6 юрт из 11", text: "В базе 14 постоянных гостей. Отправьте им предложение на выходные — рассылку подготовил, нужно ваше «да»." },
   { tag: "Внимание", title: "3 заявки ждут ответа дольше двух часов", text: "Две из Instagram, одна с сайта. Администратор сегодня отвечает медленнее обычного." },
@@ -59,8 +58,8 @@ export default function Landing() {
 
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6 md:px-8">
           <BrandLockup />
-          <Link href="/demo/" className="rounded-full border border-accent/50 px-5 py-2 text-sm font-semibold text-accent-300 transition hover:bg-accent hover:text-ink-900">
-            Открыть демо
+          <Link href="/panel/" className="rounded-full border border-accent/50 px-5 py-2 text-sm font-semibold text-accent-300 transition hover:bg-accent hover:text-ink-900">
+            Открыть платформу
           </Link>
         </nav>
 
@@ -78,7 +77,7 @@ export default function Landing() {
               что сделать сегодня.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
-              <Link href="/demo/" className="group inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-base font-bold text-ink-900 shadow-[0_10px_40px_rgba(217,164,65,0.35)] transition hover:bg-accent-400">
+              <Link href="/panel/" className="group inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-base font-bold text-ink-900 shadow-[0_10px_40px_rgba(217,164,65,0.35)] transition hover:bg-accent-400">
                 Посмотреть в работе
                 <ArrowRight size={18} className="transition group-hover:translate-x-1" />
               </Link>
@@ -111,7 +110,6 @@ export default function Landing() {
                 <div className="rounded-2xl rounded-bl-md bg-ink-600 px-4 py-3 text-stone-100">Отправил. Вечером покажу, кто забронировал.</div>
               </div>
             </div>
-            <p className="mt-3 text-center text-[11px] text-stone-400 lg:max-w-[380px]">Пример сводки. Цифры условные.</p>
           </div>
         </div>
       </header>
@@ -130,7 +128,6 @@ export default function Landing() {
             </div>
           ))}
         </div>
-        <p className="pb-4 text-center text-[11px] uppercase tracking-[0.18em] text-muted-400">Цели, под которые строится система</p>
       </section>
 
       {/* ---------- Битрикс хранит, агент думает ---------- */}
@@ -196,7 +193,6 @@ export default function Landing() {
               </article>
             ))}
           </div>
-          <p className="mt-5 text-xs text-muted-300">Примеры на условных данных. В демо советы считаются по бронями и задачам, которые вы меняете сами.</p>
         </div>
         <Ornament />
       </section>
@@ -251,7 +247,6 @@ export default function Landing() {
                 <div className="font-display text-3xl font-semibold text-accent-500/70">{String(i + 1).padStart(2, "0")}</div>
                 <h3 className="mt-3 text-base font-bold text-stone-50">{a.name}</h3>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-stone-300">{a.does}</p>
-                {a.live && <span className="mt-3 inline-block rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-bold text-emerald-300">уже в демо</span>}
               </div>
             ))}
           </div>
@@ -302,7 +297,6 @@ export default function Landing() {
               </li>
             ))}
           </ol>
-          <p className="mt-5 text-sm text-muted-200">Дальше по мере необходимости: маркетинг и платежи, контроль качества звонков, камеры и датчики.</p>
         </div>
       </section>
 
@@ -316,18 +310,17 @@ export default function Landing() {
             Лучше один раз <em className="text-accent-400">увидеть</em>
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-lg text-stone-300">
-            Демо уже работает: шахматка броней, гости, задачи и бот, которому можно написать как гость.
+            Шахматка броней, гости, задачи и бот, которому можно написать как гость.
           </p>
-          <Link href="/demo/" className="group mt-9 inline-flex items-center gap-2 rounded-full bg-accent px-9 py-4 text-lg font-bold text-ink-900 shadow-[0_10px_50px_rgba(217,164,65,0.4)] transition hover:bg-accent-400">
-            Открыть демо
+          <Link href="/panel/" className="group mt-9 inline-flex items-center gap-2 rounded-full bg-accent px-9 py-4 text-lg font-bold text-ink-900 shadow-[0_10px_50px_rgba(217,164,65,0.4)] transition hover:bg-accent-400">
+            Открыть платформу
             <ArrowRight size={20} className="transition group-hover:translate-x-1" />
           </Link>
         </div>
       </section>
 
       <footer className="border-t border-white/10 px-5 py-8 text-center text-[11px] leading-relaxed text-muted-300 md:px-8">
-        <p>Демо-версия. Гости, брони и цифры на этой странице условные.</p>
-        <p className="mt-1">
+        <p>
           Фото:{" "}
           <a className="underline hover:text-stone-200" href="https://commons.wikimedia.org/wiki/File:Chunkurchak_pano_view.jpg" target="_blank" rel="noopener">
             Vilya Shoni

@@ -7,20 +7,11 @@ import { adviceFor, morningReport, summarize, type Advice } from "@/lib/agents";
 import { formatDay, formatSom, todayISO } from "@/lib/format";
 import { useStore } from "@/lib/store";
 
-// В демо данные вымышленные; в рабочей версии агент читает их из этих систем.
-const DATA_SOURCES = ["Битрикс24", "Звонки", "Касса", "Сайт", "Instagram / WhatsApp"];
-
 const TONE: Record<Advice["tone"], { label: string; cls: string }> = {
   money: { label: "Деньги", cls: "bg-accent/20 text-accent-300" },
   warn: { label: "Внимание", cls: "bg-felt/30 text-red-200" },
   idea: { label: "Идея", cls: "bg-sky-500/15 text-sky-300" },
 };
-
-const LOCATIONS = [
-  { name: "Супара-Чункурчак", note: "Проживание: юрты, бешики, земляной домик", live: true },
-  { name: "Этно-комплекс «Супара»", note: "Ресторан в юртах, музей", live: false },
-  { name: "Супара Талкан", note: "Производство и продажа конфет", live: false },
-];
 
 export default function OverviewPage() {
   const { state } = useStore();
@@ -36,21 +27,7 @@ export default function OverviewPage() {
 
   return (
     <>
-      <PageHeader title="Обзор" subtitle={`Сегодня ${formatDay(today)}`} />
-
-      <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        {LOCATIONS.map((l) => (
-          <div key={l.name} className={`card ${l.live ? "border-accent/40" : "opacity-60"}`}>
-            <div className="flex items-start justify-between gap-2">
-              <div className="card-title">{l.name}</div>
-              <span className={`chip ${l.live ? "bg-accent/20 text-accent-300" : "bg-white/10 text-muted-200"}`}>
-                {l.live ? "В демо" : "Следующий шаг"}
-              </span>
-            </div>
-            <div className="mt-1.5 text-xs text-muted-200">{l.note}</div>
-          </div>
-        ))}
-      </div>
+      <PageHeader title="Обзор" subtitle={`Супара-Чункурчак · ${formatDay(today)}`} />
 
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Занято сегодня" value={`${s.occupiedToday} из ${s.total}`} />
@@ -69,17 +46,9 @@ export default function OverviewPage() {
       </div>
 
       <div className="card mb-4 border-accent/30">
-        <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div className="card-title">Что агент советует сегодня</div>
           <span className="chip bg-white/10 text-muted-100">Агент-аналитик</span>
-        </div>
-        <div className="mb-4 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-300">
-          <span>Источники данных:</span>
-          {DATA_SOURCES.map((d) => (
-            <span key={d} className="rounded-md border border-white/10 px-1.5 py-0.5 font-semibold text-muted-100">
-              {d}
-            </span>
-          ))}
         </div>
         {advice.length === 0 ? (
           <div className="text-sm text-muted-200">Сегодня всё идёт по плану, советов нет.</div>
@@ -105,7 +74,6 @@ export default function OverviewPage() {
           <div className="whitespace-pre-line rounded-xl bg-ink-700 px-4 py-3 text-sm leading-relaxed text-stone-100">
             {morningReport(state, showMoney)}
           </div>
-          <div className="mt-2 text-xs text-muted-300">Такой отчёт владелец будет получать в Telegram каждое утро.</div>
         </div>
 
         <div className="grid gap-4">
@@ -137,13 +105,13 @@ export default function OverviewPage() {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center justify-between gap-3">
                 <span>Заявки без подтверждения</span>
-                <Link href="/demo/bookings/" className={`chip ${s.requests ? "bg-accent/20 text-accent-300" : "bg-white/10 text-muted-200"}`}>
+                <Link href="/panel/bookings/" className={`chip ${s.requests ? "bg-accent/20 text-accent-300" : "bg-white/10 text-muted-200"}`}>
                   {s.requests}
                 </Link>
               </li>
               <li className="flex items-center justify-between gap-3">
                 <span>Просроченные задачи</span>
-                <Link href="/demo/tasks/" className={`chip ${overdue.length ? "bg-felt/30 text-red-200" : "bg-white/10 text-muted-200"}`}>
+                <Link href="/panel/tasks/" className={`chip ${overdue.length ? "bg-felt/30 text-red-200" : "bg-white/10 text-muted-200"}`}>
                   {overdue.length}
                 </Link>
               </li>

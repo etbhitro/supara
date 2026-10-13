@@ -37,7 +37,7 @@ export default function TasksPage() {
     <>
       <PageHeader
         title="Задачи"
-        subtitle="Персонал будет получать их в Telegram и отмечать выполнение с фото"
+        subtitle="Задачи персонала по объектам"
         action={
           canAdd && (
             <button className="btn-primary" onClick={dlg.show}>
