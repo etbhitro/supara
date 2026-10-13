@@ -1,0 +1,19 @@
+# секреты: только в .env, никогда в репозитории
+.env
+.env.*
+!.env.example
+
+node_modules/
+.next/
+out/
+dist/
+__pycache__/
+.venv/
+*.log
+.DS_Store
+Thumbs.db
+
+# ТЗ заказчика: только локально, репозиторий публичный
+docs/TZ.md
+*.tsbuildinfo
+next-env.d.ts
