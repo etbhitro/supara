@@ -4,11 +4,9 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { BookingBoard } from "@/components/BookingBoard";
 import { NoAccess } from "@/components/DataShell";
-import { adviceFor, summarize, type Advice } from "@/lib/agents";
+import { AGENTS, AGENT_NAME, adviceFor, morningReport, summarize, type Advice } from "@/lib/agents";
 import { formatDay, formatSom, todayISO } from "@/lib/format";
 import { useStore } from "@/lib/store";
-
-const BASE = process.env.NEXT_PUBLIC_BASE ?? "";
 
 const TONE: Record<Advice["tone"], string> = {
   money: "bg-accent-500",
@@ -25,6 +23,7 @@ export default function OverviewPage() {
   // Финансы видят только владелец и управляющий (ТЗ 4.6).
   const showMoney = state.role === "owner" || state.role === "manager";
   const today = todayISO();
+  const canAgents = showMoney;
   const advice = adviceFor(state).filter((a) => showMoney || a.tone !== "money");
   const tasks = state.tasks
     .filter((t) => !t.done)
@@ -47,34 +46,45 @@ export default function OverviewPage() {
 
   return (
     <>
-      <div className="relative isolate mb-5 overflow-hidden rounded-3xl border border-white/10">
-        <img
-          src={`${BASE}/img/chunkurchak.jpg`}
-          srcSet={`${BASE}/img/chunkurchak-960.jpg 960w, ${BASE}/img/chunkurchak.jpg 1920w`}
-          sizes="(min-width: 768px) 80vw, 100vw"
-          alt=""
-          className="absolute inset-0 -z-20 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/90 via-ink/70 to-ink/40" />
-        <div className="px-5 pb-5 pt-6 md:px-7 md:pb-7 md:pt-8">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h1 className="text-2xl font-extrabold tracking-tight text-stone-50 md:text-3xl">Супара-Чункурчак</h1>
-            <span className="text-sm font-semibold text-stone-200">{formatDay(today)}</span>
+      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {stats.map((st) => (
+          <div key={st.label} className="card py-4">
+            <div className="label-kicker">{st.label}</div>
+            <div className="mt-1.5 text-2xl font-extrabold tracking-tight text-stone-50 md:text-[1.75rem]">{st.value}</div>
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4">
-            {stats.map((st) => (
-              <div key={st.label}>
-                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-stone-300">{st.label}</div>
-                <div className="mt-1 text-2xl font-extrabold tracking-tight text-stone-50 md:text-[2rem]">{st.value}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-5">
           <BookingBoard />
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Panel title="Сводка">
+              <div className="whitespace-pre-line text-sm leading-relaxed text-stone-100">{morningReport(state, showMoney)}</div>
+            </Panel>
+
+            <Panel title="Агенты" href={canAgents ? "/agents/" : undefined}>
+              <ul className="mb-4 flex flex-wrap gap-1.5">
+                {AGENTS.filter((a) => a.live).map((a) => (
+                  <li key={a.id} className="chip bg-emerald-500/15 text-emerald-300">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    {a.name}
+                  </li>
+                ))}
+              </ul>
+              <ul className="space-y-2.5 text-sm">
+                {state.logs.slice(0, 4).map((l) => (
+                  <li key={l.id}>
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-accent-400">
+                      {AGENT_NAME[l.agent]} · {new Date(l.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                    <div className="text-stone-100">{l.text}</div>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          </div>
         </div>
 
         <div className="grid content-start gap-4 md:grid-cols-3 xl:grid-cols-1">

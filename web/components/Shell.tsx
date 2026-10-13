@@ -86,14 +86,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <RotateCcw size={13} />
           Сбросить данные
         </button>
-        <a
-          href="https://commons.wikimedia.org/wiki/File:Chunkurchak_pano_view.jpg"
-          target="_blank"
-          rel="noopener"
-          className="mt-3 block text-center text-[10px] text-muted-400 hover:text-muted-200"
-        >
-          Фото: Vilya Shoni · CC BY-SA 4.0
-        </a>
       </div>
     </div>
   );
