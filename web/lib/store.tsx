@@ -85,8 +85,48 @@ export interface Campaign {
   audience: number;
 }
 
+// ---------- Этно-комплекс: ресторан в юртах ----------
+export interface Hall {
+  id: string;
+  name: string;
+  capacity: number;
+}
+
+export type ReservationStatus = "request" | "confirmed" | "done" | "cancelled";
+
+export interface Reservation {
+  id: string;
+  hallId: string;
+  date: string;
+  time: string;
+  people: number;
+  guest: string;
+  phone: string;
+  kind: "Стол" | "Банкет";
+  status: ReservationStatus;
+  total: number; // смета банкета, для стола 0
+  prepaid: number;
+}
+
+// ---------- Супара Талкан: заказы конфет ----------
+export type OrderStatus = "new" | "production" | "ready" | "delivered";
+
+export interface Order {
+  id: string;
+  customer: string;
+  boxes: number;
+  packaging: "Стандарт" | "Дерево" | "Кожа" | "Войлок";
+  total: number;
+  paid: number;
+  due: string;
+  status: OrderStatus;
+}
+
 // Что координатор разворачивает в ответ на запрос владельца.
 export type View =
+  | { kind: "group" }
+  | { kind: "ethno" }
+  | { kind: "talkan" }
   | { kind: "summary" }
   | { kind: "board" }
   | { kind: "requests" }
@@ -132,6 +172,9 @@ export interface State {
   thread: ThreadMessage[];
   reminders: Reminder[];
   campaigns: Campaign[];
+  halls: Hall[];
+  reservations: Reservation[];
+  orders: Order[];
 }
 
 export const ROLE_LABEL: Record<Role, string> = {
@@ -180,6 +223,35 @@ function seedGuests(): Guest[] {
     { id: "g5", name: "Нурлан Садыков", phone: "+996 700 000 105", tags: ["VIP"], source: "Звонок" },
     { id: "g6", name: "Томас Вебер", phone: "+49 000 000 106", tags: [], source: "Турагентство", note: "Говорит по-английски" },
     { id: "g7", name: "Гульнара Осмонова", phone: "+996 700 000 107", tags: ["постоянный"], source: "WhatsApp" },
+  ];
+}
+
+// Названия залов — с supara.kg. [ДОПУЩЕНИЕ] Вместимость, брони и заказы условные.
+function seedHalls(): Hall[] {
+  return [
+    { id: "h-men", name: "Юрта мужчин", capacity: 20 },
+    { id: "h-ancestors", name: "Юрта предков", capacity: 30 },
+    { id: "h-warriors", name: "Юрта воинов", capacity: 25 },
+    { id: "h-big", name: "Большая юрта", capacity: 80 },
+  ];
+}
+
+function seedReservations(today: string): Reservation[] {
+  return [
+    { id: "r1", hallId: "h-ancestors", date: today, time: "13:00", people: 12, guest: "Бакыт Сыдыков", phone: "+996 700 000 201", kind: "Стол", status: "confirmed", total: 0, prepaid: 0 },
+    { id: "r2", hallId: "h-big", date: today, time: "19:00", people: 60, guest: "Чолпон Абдраимова", phone: "+996 700 000 202", kind: "Банкет", status: "confirmed", total: 180000, prepaid: 90000 },
+    { id: "r3", hallId: "h-men", date: today, time: "20:00", people: 8, guest: "Руслан Исаев", phone: "+996 700 000 203", kind: "Стол", status: "request", total: 0, prepaid: 0 },
+    { id: "r4", hallId: "h-warriors", date: addDays(today, 1), time: "18:00", people: 22, guest: "Эльмира Турдубаева", phone: "+996 700 000 204", kind: "Банкет", status: "confirmed", total: 66000, prepaid: 0 },
+    { id: "r5", hallId: "h-big", date: addDays(today, 3), time: "17:00", people: 75, guest: "Азиз Маматов", phone: "+996 700 000 205", kind: "Банкет", status: "confirmed", total: 260000, prepaid: 100000 },
+  ];
+}
+
+function seedOrders(today: string): Order[] {
+  return [
+    { id: "o1", customer: "Частный заказ", boxes: 5, packaging: "Дерево", total: 12500, paid: 12500, due: today, status: "ready" },
+    { id: "o2", customer: "Корпоративный заказ", boxes: 40, packaging: "Кожа", total: 120000, paid: 60000, due: addDays(today, 1), status: "production" },
+    { id: "o3", customer: "Свадебный заказ", boxes: 100, packaging: "Стандарт", total: 150000, paid: 0, due: addDays(today, 6), status: "new" },
+    { id: "o4", customer: "Подарочный заказ", boxes: 10, packaging: "Войлок", total: 28000, paid: 28000, due: addDays(today, -2), status: "delivered" },
   ];
 }
 
@@ -257,6 +329,9 @@ function seed(today: string): State {
     thread: [],
     reminders: [],
     campaigns: [],
+    halls: seedHalls(),
+    reservations: seedReservations(today),
+    orders: seedOrders(today),
   };
 }
 
@@ -362,7 +437,7 @@ export function addPayment(state: State, bookingId: string, amount: number): Sta
   };
 }
 
-const KEY = "supara-mvp-v5";
+const KEY = "supara-mvp-v6";
 
 interface Store {
   state: State;

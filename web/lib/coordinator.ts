@@ -3,6 +3,7 @@
 
 import { adviceFor, funnel, parseDates, salesQueue, summarize } from "./agents";
 import { addDays, formatRange, formatSom, todayISO } from "./format";
+import { ethnoStats, talkanStats } from "./locations";
 import { freeUnits, type State, type View } from "./store";
 
 export interface Reply {
@@ -11,7 +12,7 @@ export interface Reply {
 }
 
 // Быстрые запросы под строкой ввода.
-export const PROMPTS = ["Сводка", "Брони", "Заявки", "Задачи", "Деньги", "Что делать сегодня?", "Команда"];
+export const PROMPTS = ["Сводка", "Чункурчак", "Этно-комплекс", "Талкан", "Деньги", "Что делать сегодня?", "Команда"];
 
 function plural(n: number, one: string, few: string, many: string): string {
   const d = n % 10;
@@ -23,12 +24,20 @@ function plural(n: number, one: string, few: string, many: string): string {
 
 export function statusLine(state: State): string {
   const s = summarize(state);
-  const requests = state.bookings.filter((b) => b.status === "request").length;
-  const parts = [`Занято ${s.occupiedToday} из ${s.total}`];
-  if (s.arrivals.length) parts.push(`${s.arrivals.length} ${plural(s.arrivals.length, "заезд", "заезда", "заездов")}`);
-  if (s.departures.length) parts.push(`${s.departures.length} ${plural(s.departures.length, "выезд", "выезда", "выездов")}`);
-  if (requests) parts.push(`${requests} ${plural(requests, "заявка", "заявки", "заявок")}`);
-  return parts.join(" · ");
+  const e = ethnoStats(state);
+  const t = talkanStats(state);
+  return [
+    `Чункурчак ${s.occupiedToday} из ${s.total}`,
+    `ресторан: ${e.today} ${plural(e.today, "бронь", "брони", "броней")}`,
+    `Талкан: ${t.active} ${plural(t.active, "заказ", "заказа", "заказов")}`,
+  ].join(" · ");
+}
+
+// Какое фото показать на фоне для ответа.
+export function sceneOf(view: View | undefined): "chunkurchak" | "ethno" | "talkan" {
+  if (view?.kind === "ethno") return "ethno";
+  if (view?.kind === "talkan") return "talkan";
+  return "chunkurchak";
 }
 
 export function route(state: State, raw: string): Reply {
@@ -39,6 +48,17 @@ export function route(state: State, raw: string): Reply {
   if (/что делать|совет|внимани|проблем|аналит/.test(text)) {
     const n = adviceFor(state).length;
     return n ? { text: `${n} ${plural(n, "вопрос требует", "вопроса требуют", "вопросов требуют")} внимания.`, view: { kind: "advice" } } : { text: "Всё идёт по плану." };
+  }
+  if (/этно|ресторан|столик|столы|банкет|кок-жар|музей/.test(text)) {
+    const e = ethnoStats(state);
+    return { text: `Сегодня ${e.today} ${plural(e.today, "бронь", "брони", "броней")}, ${e.guests} гостей.`, view: { kind: "ethno" } };
+  }
+  if (/талкан|конфет|шоколад|производств|набор/.test(text)) {
+    const t = talkanStats(state);
+    return { text: `В работе ${t.active} ${plural(t.active, "заказ", "заказа", "заказов")} на ${formatSom(t.sum)}.`, view: { kind: "talkan" } };
+  }
+  if (/чункурчак|проживан|юрт|бешик/.test(text)) {
+    return { text: `Занято ${s.occupiedToday} из ${s.total}, загрузка на неделю ${Math.round(s.occupancyWeek * 100)}%.`, view: { kind: "summary" } };
   }
   if (/команд|сотрудник|агент/.test(text)) return { text: "Восемь сотрудников на связи.", view: { kind: "team" } };
   if (/роп|воронк|конверс/.test(text)) {
@@ -61,7 +81,8 @@ export function route(state: State, raw: string): Reply {
     return { text: `Открыто ${open.length}${overdue ? `, просрочено ${overdue}` : ""}.`, view: { kind: "tasks" } };
   }
   if (/деньг|заработ|выручк|оплат|касс|финанс|доход|чек/.test(text)) {
-    return { text: `Получено ${formatSom(s.paidTotal)}, к доплате ${formatSom(s.dueTotal)}.`, view: { kind: "money" } };
+    const all = s.paidTotal + ethnoStats(state).prepaid + talkanStats(state).paid;
+    return { text: `По группе получено ${formatSom(all)}.`, view: { kind: "money" } };
   }
   const dates = parseDates(text, today);
   if (/свобод|мест/.test(text) || dates) {
@@ -70,7 +91,7 @@ export function route(state: State, raw: string): Reply {
     const free = freeUnits(state, from, to).length;
     return { text: `${formatRange(from, to)}: свободно ${free} из ${state.units.length}.`, view: { kind: "free", from, to } };
   }
-  if (/брон|шахматк|календар|занят|загруз/.test(text)) return { text: "Шахматка на две недели.", view: { kind: "board" } };
+  if (/брон|шахматк|календар|занят|загруз/.test(text)) return { text: "Шахматка Чункурчака на две недели.", view: { kind: "board" } };
   if (/гост|клиент/.test(text)) return { text: `В базе ${state.guests.length} гостей.`, view: { kind: "guests" } };
-  return { text: `${statusLine(state)}.`, view: { kind: "summary" } };
+  return { text: "Три направления, одна картина.", view: { kind: "group" } };
 }

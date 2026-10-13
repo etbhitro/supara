@@ -18,19 +18,19 @@ import {
 const DAYS = 14;
 
 const STATUS_CELL: Record<BookingStatus, string> = {
-  request: "bg-accent/25 text-accent-100 border-accent/60 border-dashed",
-  confirmed: "bg-emerald-500/25 text-emerald-100 border-emerald-400/40",
-  checked_in: "bg-sky-500/30 text-sky-100 border-sky-400/40",
-  checked_out: "bg-white/10 text-muted-100 border-white/10",
+  request: "bg-amber-100 text-amber-900 border-amber-400 border-dashed",
+  confirmed: "bg-emerald-100 text-emerald-900 border-emerald-300",
+  checked_in: "bg-sky-100 text-sky-900 border-sky-300",
+  checked_out: "bg-stone-200 text-stone-600 border-stone-300",
   cancelled: "",
 };
 
 const STATUS_CHIP: Record<BookingStatus, string> = {
-  request: "bg-accent/20 text-accent-300",
-  confirmed: "bg-emerald-500/15 text-emerald-300",
-  checked_in: "bg-sky-500/15 text-sky-300",
-  checked_out: "bg-white/10 text-muted-100",
-  cancelled: "bg-felt/30 text-red-200",
+  request: "bg-amber-100 text-amber-800",
+  confirmed: "bg-emerald-100 text-emerald-800",
+  checked_in: "bg-sky-100 text-sky-800",
+  checked_out: "bg-stone-200 text-stone-600",
+  cancelled: "bg-red-100 text-red-800",
 };
 
 export interface Draft {
@@ -78,16 +78,16 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl bg-ink-700/60 ring-1 ring-inset ring-white/[0.06]">
+      <div className="overflow-x-auto rounded-2xl bg-white/70 ring-1 ring-inset ring-black/[0.06]">
         <div className="grid min-w-[980px]" style={{ gridTemplateColumns: `132px repeat(${DAYS}, minmax(58px, 1fr))` }}>
-          <div className="sticky left-0 z-10 border-b border-white/10 bg-ink-700 px-3 py-2 text-xs font-medium text-muted-200">
+          <div className="sticky left-0 z-10 border-b border-black/10 bg-sand px-3 py-2 text-xs font-medium text-muted-200">
             Объект
           </div>
           {days.map((d) => (
             <div
               key={d}
-              className={`border-b border-l border-white/10 px-1 py-2 text-center text-[11px] leading-tight ${
-                d === today ? "bg-accent/15 font-medium text-accent-300" : isWeekend(d) ? "bg-white/[0.04] text-stone-200" : "text-muted-200"
+              className={`border-b border-l border-black/10 px-1 py-2 text-center text-[11px] leading-tight ${
+                d === today ? "bg-leaf-soft font-medium text-leaf-dark" : isWeekend(d) ? "bg-black/[0.04] text-ink/80" : "text-muted-200"
               }`}
             >
               <div className="font-medium">{fromISO(d).getDate()}</div>
@@ -97,8 +97,8 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
 
           {state.units.map((u) => (
             <div key={u.id} className="contents">
-              <div className="sticky left-0 z-10 border-b border-white/5 bg-ink-700 px-3 py-2">
-                <div className="text-sm font-medium text-stone-100">{u.name}</div>
+              <div className="sticky left-0 z-10 border-b border-black/5 bg-sand px-3 py-2">
+                <div className="text-sm font-medium text-ink">{u.name}</div>
                 <div className="text-[10px] text-muted-300">
                   до {u.capacity} чел. · {u.price.toLocaleString("ru-RU")}
                 </div>
@@ -110,7 +110,7 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
                     <button
                       key={d}
                       onClick={() => setDraft({ unitId: u.id, from: d, to: addDays(d, 1) })}
-                      className="border-b border-l border-white/5 transition hover:bg-accent/10"
+                      className="border-b border-l border-black/5 transition hover:bg-leaf-soft"
                       aria-label={`Забронировать ${u.name}`}
                     />
                   );
@@ -133,7 +133,7 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
         </div>
       </div>
 
-      {showRequests && <h2 className="mb-3 mt-8 text-base font-bold text-stone-50">Заявки</h2>}
+      {showRequests && <h2 className="mb-3 mt-8 text-base font-bold text-ink">Заявки</h2>}
       {!showRequests ? null : requests.length === 0 ? (
         <EmptyState title="Новых заявок нет" />
       ) : (
@@ -146,7 +146,7 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
               <Cell className="whitespace-nowrap">{formatSom(b.total)}</Cell>
               <Cell>{b.source}</Cell>
               <Cell>
-                <span className="chip bg-accent/20 text-accent-300">Открыть</span>
+                <span className="chip bg-amber-100 text-amber-800">Открыть</span>
               </Cell>
             </Row>
           ))}
@@ -211,7 +211,7 @@ export function NewBookingDialog({ draft, onClose }: { draft: Draft; onClose: ()
         <Field label="Объект">
           <select className={inputCls} value={unitId} onChange={(e) => setUnitId(e.target.value)}>
             {state.units.map((u) => (
-              <option key={u.id} value={u.id} className="bg-ink-800">
+              <option key={u.id} value={u.id} className="bg-white">
                 {u.name} · до {u.capacity} чел. · {formatSom(u.price)}
               </option>
             ))}
@@ -239,7 +239,7 @@ export function NewBookingDialog({ draft, onClose }: { draft: Draft; onClose: ()
         <Field label="Источник">
           <select className={inputCls} value={source} onChange={(e) => setSource(e.target.value)}>
             {SOURCES.map((s) => (
-              <option key={s} className="bg-ink-800">
+              <option key={s} className="bg-white">
                 {s}
               </option>
             ))}
@@ -248,10 +248,10 @@ export function NewBookingDialog({ draft, onClose }: { draft: Draft; onClose: ()
 
         {unit && nights > 0 && (
           <div className="mb-3 text-sm text-muted-100">
-            {nights} ноч. × {formatSom(unit.price)} = <b className="text-stone-50">{formatSom(unit.price * nights)}</b>
+            {nights} ноч. × {formatSom(unit.price)} = <b className="text-ink">{formatSom(unit.price * nights)}</b>
           </div>
         )}
-        {error && <div className="mb-3 rounded-lg bg-felt/25 px-3 py-2 text-sm font-semibold text-red-200">{error}</div>}
+        {error && <div className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">{error}</div>}
         <button className="btn-primary w-full" type="submit">
           Сохранить бронь
         </button>
@@ -343,7 +343,7 @@ function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="label-kicker">{label}</dt>
-      <dd className="mt-0.5 font-semibold text-stone-100">{value}</dd>
+      <dd className="mt-0.5 font-semibold text-ink">{value}</dd>
     </div>
   );
 }

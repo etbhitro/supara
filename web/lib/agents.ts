@@ -3,6 +3,7 @@
 // те же, что будут у настоящих агентов: бот не подтверждает бронь сам, всё пишет в журнал.
 
 import { addDays, formatDay, formatRange, formatSom, fromISO, nightsBetween, toISO, todayISO } from "./format";
+import { locationAlerts } from "./locations";
 import {
   addBooking,
   freeUnits,
@@ -368,7 +369,9 @@ export function adviceFor(state: State): Advice[] {
     });
   }
 
-  return out.slice(0, 4);
+  // Ресторан и производство — в начало: там сроки короче.
+  const alerts: Advice[] = locationAlerts(state).map((a) => ({ tone: "warn", ...a }));
+  return [...alerts, ...out].slice(0, 6);
 }
 
 // ---------- Продажи ----------

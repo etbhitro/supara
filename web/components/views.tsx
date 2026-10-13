@@ -20,14 +20,42 @@ import {
   summarize,
 } from "@/lib/agents";
 import { addDays, formatDay, formatRange, formatSom, fromISO, isWeekend, nightsBetween, todayISO } from "@/lib/format";
+import {
+  ORDER_LABEL,
+  RESERVATION_LABEL,
+  advanceOrder,
+  ethnoStats,
+  hallName,
+  nextOrderStatus,
+  reservationsOn,
+  setReservation,
+  talkanStats,
+  upcomingBanquets,
+} from "@/lib/locations";
 import { shortDate, useMarket } from "@/lib/market";
-import { freeUnits, setStatus, uid, useStore, type AgentId, type View } from "@/lib/store";
+import {
+  freeUnits,
+  setStatus,
+  uid,
+  useStore,
+  type AgentId,
+  type OrderStatus,
+  type Reservation,
+  type ReservationStatus,
+  type View,
+} from "@/lib/store";
 
 // Карточка может задать координатору следующий вопрос (например, плитка сотрудника).
 export const AskContext = createContext<(text: string) => void>(() => {});
 
 export function ViewCard({ view }: { view: View }) {
   switch (view.kind) {
+    case "group":
+      return <Group />;
+    case "ethno":
+      return <Ethno />;
+    case "talkan":
+      return <Talkan />;
     case "summary":
       return <Summary />;
     case "board":
@@ -77,10 +105,11 @@ function Figure({ label, value }: { label: string; value: string }) {
 }
 
 function Rows({ children }: { children: React.ReactNode }) {
-  return <ul className="divide-y divide-white/[0.06]">{children}</ul>;
+  return <ul className="divide-y divide-black/[0.06]">{children}</ul>;
 }
 
 function Summary() {
+  const ask = useContext(AskContext);
   const { state } = useStore();
   const s = summarize(state);
   const today = todayISO();
@@ -107,20 +136,20 @@ function Summary() {
         {load.map(({ day, busy }) => (
           <div key={day} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
             <span
-              className={`w-full rounded-md ${busy ? (isWeekend(day) ? "bg-accent" : "bg-stone-400") : "bg-white/10"}`}
+              className={`w-full rounded-md ${busy ? (isWeekend(day) ? "bg-accent" : "bg-leaf/60") : "bg-black/10"}`}
               style={{ height: `${Math.max(6, (busy / Math.max(1, s.total)) * 100)}%` }}
             />
-            <span className={`text-[10px] ${day === today ? "font-semibold text-stone-50" : "text-muted-300"}`}>{fromISO(day).getDate()}</span>
+            <span className={`text-[10px] ${day === today ? "font-semibold text-ink" : "text-muted-300"}`}>{fromISO(day).getDate()}</span>
           </div>
         ))}
       </div>
 
       {moves.length > 0 && (
-        <div className="mt-6 border-t border-white/[0.06] pt-2">
+        <div className="mt-6 border-t border-black/[0.06] pt-2">
           <Rows>
             {moves.map((m) => (
               <li key={m.key} className="flex items-center justify-between gap-3 py-3 text-[15px]">
-                <span className="min-w-0 truncate text-stone-100">
+                <span className="min-w-0 truncate text-ink">
                   {m.unit} <span className="text-muted-200">· {m.guest}</span>
                 </span>
                 <span className="text-sm text-muted-200">{m.kind}</span>
@@ -129,6 +158,14 @@ function Summary() {
           </Rows>
         </div>
       )}
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        {["Шахматка", "Заявки", "Задачи"].map((q) => (
+          <button key={q} className="btn-ghost" onClick={() => ask(q)}>
+            {q}
+          </button>
+        ))}
+      </div>
     </Card>
   );
 }
@@ -143,7 +180,7 @@ function Requests() {
         {items.map((i) => (
           <li key={i.booking.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5">
             <div className="min-w-[160px] flex-1">
-              <div className="text-[15px] text-stone-50">{i.guest}</div>
+              <div className="text-[15px] text-ink">{i.guest}</div>
               <div className="text-sm text-muted-200">
                 {i.unit} · {formatRange(i.booking.from, i.booking.to)} · {formatSom(i.booking.total)}
               </div>
@@ -173,12 +210,12 @@ function Tasks() {
             <button
               onClick={() => update((s) => ({ ...s, tasks: s.tasks.map((x) => (x.id === t.id ? { ...x, done: true } : x)) }))}
               aria-label="Отметить выполненной"
-              className="grid h-6 w-6 shrink-0 place-items-center rounded-full ring-1 ring-inset ring-white/25 text-transparent transition hover:bg-stone-50 hover:text-ink-900"
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-full ring-1 ring-inset ring-black/25 text-transparent transition hover:bg-leaf hover:text-white"
             >
               <Check size={13} strokeWidth={3} />
             </button>
             <div className="min-w-0 flex-1">
-              <div className="text-[15px] text-stone-50">{t.title}</div>
+              <div className="text-[15px] text-ink">{t.title}</div>
               <div className="text-sm text-muted-200">{t.assignee}</div>
             </div>
             <span className={`text-sm ${t.due < today ? "text-felt" : "text-muted-200"}`}>{t.due < today ? "просрочено" : formatDay(t.due)}</span>
@@ -186,7 +223,7 @@ function Tasks() {
         ))}
         {open.length === 0 && <li className="py-3.5 text-[15px] text-muted-200">Все задачи выполнены</li>}
       </Rows>
-      <div className="flex justify-end border-t border-white/[0.06] pt-3">
+      <div className="flex justify-end border-t border-black/[0.06] pt-3">
         <button className="btn-ghost" onClick={() => update(operationsRound)}>
           Сделать обход
         </button>
@@ -202,11 +239,11 @@ function Bars({ rows }: { rows: { label: string; value: number; note: string }[]
       {rows.map((r) => (
         <li key={r.label}>
           <div className="mb-1.5 flex items-baseline justify-between gap-4 text-[15px]">
-            <span className="text-stone-100">{r.label}</span>
+            <span className="text-ink">{r.label}</span>
             <span className="text-muted-200">{r.note}</span>
           </div>
-          <span className="block h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
-            <span className="block h-full rounded-full bg-stone-200" style={{ width: `${(r.value / max) * 100}%` }} />
+          <span className="block h-1.5 overflow-hidden rounded-full bg-black/[0.07]">
+            <span className="block h-full rounded-full bg-leaf" style={{ width: `${(r.value / max) * 100}%` }} />
           </span>
         </li>
       ))}
@@ -227,6 +264,17 @@ function Money() {
         <Figure label="средний чек, сом" value={Math.round(f.avgCheck).toLocaleString("ru-RU")} />
       </div>
       <div className="mt-8">
+        <div className="label-kicker mb-4">Получено по направлениям</div>
+        <Bars
+          rows={[
+            { label: "Чункурчак", value: s.paidTotal, note: formatSom(s.paidTotal) },
+            { label: "Этно-комплекс", value: ethnoStats(state).prepaid, note: formatSom(ethnoStats(state).prepaid) },
+            { label: "Талкан", value: talkanStats(state).paid, note: formatSom(talkanStats(state).paid) },
+          ]}
+        />
+      </div>
+      <div className="mt-8">
+        <div className="label-kicker mb-4">Каналы Чункурчака</div>
         <Bars rows={rows.map((r) => ({ label: r.source, value: r.revenue, note: formatSom(r.revenue) }))} />
       </div>
     </Card>
@@ -249,7 +297,7 @@ function Free({ from, to }: { from: string; to: string }) {
           return (
             <li key={kind} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5">
               <div className="min-w-[160px] flex-1">
-                <div className="text-[15px] text-stone-50">{kind}</div>
+                <div className="text-[15px] text-ink">{kind}</div>
                 <div className="text-sm text-muted-200">
                   свободно {units.length} · до {unit.capacity} гостей · {formatSom(unit.price * nights)}
                 </div>
@@ -287,13 +335,13 @@ function Team() {
           key={a.id}
           disabled={a.id === "coordinator"}
           onClick={() => ask(a.name)}
-          className="group rounded-3xl bg-ink-800 p-4 text-left ring-1 ring-inset ring-white/[0.06] transition enabled:hover:bg-ink-700"
+          className="group rounded-3xl bg-white/85 p-4 text-left shadow-soft ring-1 ring-inset ring-black/[0.04] backdrop-blur-md transition enabled:hover:bg-white"
         >
           <div className="flex items-center justify-between">
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            <ArrowUpRight size={15} className="text-muted-400 transition group-enabled:group-hover:text-stone-50" />
+            <ArrowUpRight size={15} className="text-muted-400 transition group-enabled:group-hover:text-leaf" />
           </div>
-          <div className="mt-5 text-[15px] text-stone-50">{a.name}</div>
+          <div className="mt-5 text-[15px] text-ink">{a.name}</div>
           <div className="mt-0.5 text-sm text-muted-200">{load[a.id]}</div>
         </button>
       ))}
@@ -336,12 +384,12 @@ function Marketing() {
         }))}
       />
       {state.campaigns.map((c) => (
-        <div key={c.id} className="mt-6 rounded-2xl bg-ink-700 p-4">
+        <div key={c.id} className="mt-6 rounded-2xl bg-sand p-4">
           <div className="flex items-baseline justify-between gap-3 text-sm text-muted-200">
             <span>{c.title}</span>
             <span>получателей: {c.audience}</span>
           </div>
-          <div className="mt-2 text-[15px] leading-relaxed text-stone-100">{c.text}</div>
+          <div className="mt-2 text-[15px] leading-relaxed text-ink">{c.text}</div>
         </div>
       ))}
       <div className="mt-6 flex justify-end">
@@ -363,12 +411,12 @@ function MarketView() {
           <li key={i.url}>
             <a href={i.url} target="_blank" rel="noopener" className="group flex items-start justify-between gap-4 py-3.5">
               <span className="min-w-0">
-                <span className="block text-[15px] text-stone-50 group-hover:text-accent">{i.title}</span>
+                <span className="block text-[15px] text-ink group-hover:text-leaf">{i.title}</span>
                 <span className="text-sm text-muted-200">
                   {i.source} · {shortDate(i.date)}
                 </span>
               </span>
-              <ArrowUpRight size={16} className="mt-1 shrink-0 text-muted-400 group-hover:text-accent" />
+              <ArrowUpRight size={16} className="mt-1 shrink-0 text-muted-400 group-hover:text-leaf" />
             </a>
           </li>
         ))}
@@ -389,7 +437,7 @@ function Sales() {
             <li key={i.booking.id} className="py-3.5">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <div className="min-w-[160px] flex-1">
-                  <div className="text-[15px] text-stone-50">{i.guest}</div>
+                  <div className="text-[15px] text-ink">{i.guest}</div>
                   <div className="text-sm text-muted-200">
                     {i.unit} · {formatRange(i.booking.from, i.booking.to)} · {i.kind === "request" ? "заявка" : `долг ${formatSom(i.due)}`}
                   </div>
@@ -400,13 +448,13 @@ function Sales() {
                   </button>
                 )}
               </div>
-              {message && <div className="mt-3 rounded-2xl bg-ink-700 p-4 text-[15px] leading-relaxed text-stone-100">{message.text}</div>}
+              {message && <div className="mt-3 rounded-2xl bg-sand p-4 text-[15px] leading-relaxed text-ink">{message.text}</div>}
             </li>
           );
         })}
       </Rows>
       {queue.some((i) => !i.reminded) && (
-        <div className="flex justify-end border-t border-white/[0.06] pt-3">
+        <div className="flex justify-end border-t border-black/[0.06] pt-3">
           <button className="btn-primary" onClick={() => update((s) => salesQueue(s).reduce((acc, i) => prepareReminder(acc, i.booking.id), s))}>
             Напомнить всем
           </button>
@@ -422,6 +470,8 @@ const ADVICE_FOLLOWUP: Record<string, string> = {
   Заявок: "Заявки",
   Просроченных: "Задачи",
   Главный: "Маркетолог",
+  Банкет: "Этно-комплекс",
+  Заказ: "Талкан",
 };
 
 function AdviceView() {
@@ -437,7 +487,7 @@ function AdviceView() {
           return (
             <li key={a.title} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5">
               <div className="min-w-[200px] flex-1">
-                <div className="text-[15px] text-stone-50">{a.title}</div>
+                <div className="text-[15px] text-ink">{a.title}</div>
                 <div className="text-sm text-muted-200">{a.text}</div>
               </div>
               {next && (
@@ -463,7 +513,7 @@ function Guests() {
           return (
             <li key={g.id} className="flex items-center justify-between gap-4 py-3.5">
               <div className="min-w-0">
-                <div className="text-[15px] text-stone-50">{g.name}</div>
+                <div className="text-[15px] text-ink">{g.name}</div>
                 <div className="truncate text-sm text-muted-200">
                   {g.phone}
                   {g.tags.length ? ` · ${g.tags.join(", ")}` : ""}
@@ -501,7 +551,7 @@ function GuestBot() {
           <div key={m.id} className={`flex ${m.from === "guest" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[85%] whitespace-pre-line rounded-3xl px-4 py-2.5 text-[15px] leading-relaxed ${
-                m.from === "guest" ? "bg-stone-50 text-ink-900" : "bg-ink-700 text-stone-100"
+                m.from === "guest" ? "bg-leaf text-white" : "bg-sand text-ink"
               }`}
             >
               {m.text}
@@ -509,17 +559,164 @@ function GuestBot() {
           </div>
         ))}
       </div>
-      <form onSubmit={send} className="mt-4 flex items-center gap-2 rounded-full bg-ink-700 py-1.5 pl-5 pr-1.5">
+      <form onSubmit={send} className="mt-4 flex items-center gap-2 rounded-full bg-sand py-1.5 pl-5 pr-1.5">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Хочу юрту с 20 по 22, нас четверо"
-          className="min-w-0 flex-1 bg-transparent text-[15px] text-stone-50 outline-none placeholder:text-muted-300"
+          className="min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-muted-300"
         />
-        <button type="submit" aria-label="Отправить" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/10 text-stone-50 hover:bg-white/20">
+        <button type="submit" aria-label="Отправить" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/[0.06] text-ink hover:bg-black/10">
           <Send size={15} />
         </button>
       </form>
+    </Card>
+  );
+}
+
+// ---------- Вся группа, ресторан, производство ----------
+
+function Group() {
+  const ask = useContext(AskContext);
+  const { state } = useStore();
+  const s = summarize(state);
+  const e = ethnoStats(state);
+  const t = talkanStats(state);
+  const tiles = [
+    { name: "Чункурчак", figure: `${s.occupiedToday}/${s.total}`, label: "занято сегодня", note: `загрузка на неделю ${Math.round(s.occupancyWeek * 100)}%` },
+    { name: "Этно-комплекс", figure: String(e.today), label: "броней сегодня", note: `${e.guests} гостей · банкетов впереди: ${e.banquets}` },
+    { name: "Талкан", figure: String(t.active), label: "заказов в работе", note: `${t.boxes} наборов · ${formatSom(t.sum)}` },
+  ];
+  return (
+    <div className="grid animate-rise gap-3 sm:grid-cols-3">
+      {tiles.map((x) => (
+        <button key={x.name} onClick={() => ask(x.name)} className="card group p-5 text-left transition hover:bg-white">
+          <div className="flex items-center justify-between text-[15px] text-ink">
+            {x.name}
+            <ArrowUpRight size={16} className="text-muted-400 transition group-hover:text-leaf" />
+          </div>
+          <div className="figure mt-6">{x.figure}</div>
+          <div className="label-kicker mt-2">{x.label}</div>
+          <div className="mt-4 text-sm text-muted-200">{x.note}</div>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+const RESERVATION_CHIP: Record<ReservationStatus, string> = {
+  request: "bg-amber-100 text-amber-800",
+  confirmed: "bg-emerald-100 text-emerald-800",
+  done: "bg-stone-200 text-stone-600",
+  cancelled: "bg-red-100 text-red-800",
+};
+
+function ReservationRow({ r, withDate }: { r: Reservation; withDate?: boolean }) {
+  const { state, update } = useStore();
+  return (
+    <li className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5">
+      <span className="w-[4.5rem] shrink-0 text-[15px] tabular-nums text-ink">{withDate ? formatDay(r.date) : r.time}</span>
+      <div className="min-w-[160px] flex-1">
+        <div className="text-[15px] text-ink">
+          {hallName(state, r.hallId)} <span className="text-muted-200">· {r.people} гостей</span>
+        </div>
+        <div className="text-sm text-muted-200">
+          {r.guest}
+          {r.kind === "Банкет" ? ` · банкет ${formatSom(r.total)}, внесено ${formatSom(r.prepaid)}` : ""}
+        </div>
+      </div>
+      {r.status === "request" ? (
+        <button className="btn-primary" onClick={() => update((s) => setReservation(s, r.id, "confirmed"))}>
+          Подтвердить
+        </button>
+      ) : (
+        <span className={`chip ${RESERVATION_CHIP[r.status]}`}>{RESERVATION_LABEL[r.status]}</span>
+      )}
+    </li>
+  );
+}
+
+function Ethno() {
+  const { state } = useStore();
+  const e = ethnoStats(state);
+  const today = reservationsOn(state, todayISO());
+  const banquets = upcomingBanquets(state);
+  return (
+    <Card>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-3">
+        <Figure label="броней сегодня" value={String(e.today)} />
+        <Figure label="гостей сегодня" value={String(e.guests)} />
+        <Figure label="предоплаты, сом" value={e.prepaid.toLocaleString("ru-RU")} />
+      </div>
+      {today.length > 0 && (
+        <div className="mt-6 border-t border-black/[0.06] pt-2">
+          <Rows>
+            {today.map((r) => (
+              <ReservationRow key={r.id} r={r} />
+            ))}
+          </Rows>
+        </div>
+      )}
+      {banquets.length > 0 && (
+        <div className="mt-4">
+          <div className="label-kicker">Банкеты впереди</div>
+          <Rows>
+            {banquets.map((r) => (
+              <ReservationRow key={r.id} r={r} withDate />
+            ))}
+          </Rows>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+const ORDER_CHIP: Record<OrderStatus, string> = {
+  new: "bg-amber-100 text-amber-800",
+  production: "bg-sky-100 text-sky-800",
+  ready: "bg-emerald-100 text-emerald-800",
+  delivered: "bg-stone-200 text-stone-600",
+};
+
+function Talkan() {
+  const { state, update } = useStore();
+  const t = talkanStats(state);
+  const today = todayISO();
+  const orders = [...state.orders].sort((a, b) => a.due.localeCompare(b.due));
+  return (
+    <Card>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-3">
+        <Figure label="заказов в работе" value={String(t.active)} />
+        <Figure label="наборов" value={String(t.boxes)} />
+        <Figure label="на сумму, сом" value={t.sum.toLocaleString("ru-RU")} />
+      </div>
+      <div className="mt-6 border-t border-black/[0.06] pt-2">
+        <Rows>
+          {orders.map((o) => {
+            const next = nextOrderStatus(o.status);
+            const late = o.status !== "delivered" && o.due < today;
+            return (
+              <li key={o.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5">
+                <div className="min-w-[170px] flex-1">
+                  <div className="text-[15px] text-ink">
+                    {o.customer} <span className="text-muted-200">· {o.boxes} наборов, {o.packaging.toLowerCase()}</span>
+                  </div>
+                  <div className={`text-sm ${late ? "text-felt" : "text-muted-200"}`}>
+                    к {formatDay(o.due)} · {formatSom(o.total)}
+                    {o.paid < o.total ? ` · оплачено ${formatSom(o.paid)}` : " · оплачен"}
+                  </div>
+                </div>
+                <span className={`chip ${ORDER_CHIP[o.status]}`}>{ORDER_LABEL[o.status]}</span>
+                {next && (
+                  <button className="btn-ghost" onClick={() => update((s) => advanceOrder(s, o.id))}>
+                    {ORDER_LABEL[next]} →
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </Rows>
+      </div>
     </Card>
   );
 }
