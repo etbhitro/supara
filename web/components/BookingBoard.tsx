@@ -18,19 +18,19 @@ import {
 const DAYS = 14;
 
 const STATUS_CELL: Record<BookingStatus, string> = {
-  request: "bg-amber-100 text-amber-900 border-amber-400 border-dashed",
-  confirmed: "bg-emerald-100 text-emerald-900 border-emerald-300",
-  checked_in: "bg-sky-100 text-sky-900 border-sky-300",
-  checked_out: "bg-stone-200 text-stone-600 border-stone-300",
+  request: "bg-[#F6E9CC] text-[#6E5210] border-[#D9B45C] border-dashed",
+  confirmed: "bg-[#EBDCCD] text-[#5F4027] border-[#D3B79C]",
+  checked_in: "bg-[#E6BFA8] text-[#6A2F18] border-[#CF9C7F]",
+  checked_out: "bg-[#E9E4DC] text-[#857B6F] border-[#D8D0C4]",
   cancelled: "",
 };
 
 const STATUS_CHIP: Record<BookingStatus, string> = {
-  request: "bg-amber-100 text-amber-800",
-  confirmed: "bg-emerald-100 text-emerald-800",
-  checked_in: "bg-sky-100 text-sky-800",
-  checked_out: "bg-stone-200 text-stone-600",
-  cancelled: "bg-red-100 text-red-800",
+  request: "bg-[#F6E9CC] text-[#6E5210]",
+  confirmed: "bg-[#EBDCCD] text-[#5F4027]",
+  checked_in: "bg-[#E6BFA8] text-[#6A2F18]",
+  checked_out: "bg-[#E9E4DC] text-[#857B6F]",
+  cancelled: "bg-[#F3D5CB] text-[#8A2E17]",
 };
 
 export interface Draft {
@@ -80,14 +80,14 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
 
       <div className="overflow-x-auto rounded-2xl bg-white/70 ring-1 ring-inset ring-black/[0.06]">
         <div className="grid min-w-[980px]" style={{ gridTemplateColumns: `132px repeat(${DAYS}, minmax(58px, 1fr))` }}>
-          <div className="sticky left-0 z-10 border-b border-black/10 bg-sand px-3 py-2 text-xs font-medium text-muted-200">
+          <div className="sticky left-0 z-10 border-b border-black/10 bg-[#F6F0E7] px-3 py-2 text-xs font-medium text-muted-200">
             Объект
           </div>
           {days.map((d) => (
             <div
               key={d}
               className={`border-b border-l border-black/10 px-1 py-2 text-center text-[11px] leading-tight ${
-                d === today ? "bg-leaf-soft font-medium text-leaf-dark" : isWeekend(d) ? "bg-black/[0.04] text-ink/80" : "text-muted-200"
+                d === today ? "bg-bronze-soft font-medium text-bronze-dark" : isWeekend(d) ? "bg-black/[0.04] text-ink/80" : "text-muted-200"
               }`}
             >
               <div className="font-medium">{fromISO(d).getDate()}</div>
@@ -97,7 +97,7 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
 
           {state.units.map((u) => (
             <div key={u.id} className="contents">
-              <div className="sticky left-0 z-10 border-b border-black/5 bg-sand px-3 py-2">
+              <div className="sticky left-0 z-10 border-b border-black/5 bg-[#F6F0E7] px-3 py-2">
                 <div className="text-sm font-medium text-ink">{u.name}</div>
                 <div className="text-[10px] text-muted-300">
                   до {u.capacity} чел. · {u.price.toLocaleString("ru-RU")}
@@ -110,7 +110,7 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
                     <button
                       key={d}
                       onClick={() => setDraft({ unitId: u.id, from: d, to: addDays(d, 1) })}
-                      className="border-b border-l border-black/5 transition hover:bg-leaf-soft"
+                      className="border-b border-l border-black/5 transition hover:bg-bronze-soft"
                       aria-label={`Забронировать ${u.name}`}
                     />
                   );
@@ -146,7 +146,7 @@ export function BookingBoard({ showRequests = false }: { showRequests?: boolean 
               <Cell className="whitespace-nowrap">{formatSom(b.total)}</Cell>
               <Cell>{b.source}</Cell>
               <Cell>
-                <span className="chip bg-amber-100 text-amber-800">Открыть</span>
+                <span className="chip bg-[#F6E9CC] text-[#6E5210]">Открыть</span>
               </Cell>
             </Row>
           ))}

@@ -11,10 +11,10 @@ const BASE = process.env.NEXT_PUBLIC_BASE ?? "";
 
 // Фото на фоне: едва заметное, меняется вместе с темой разговора.
 const SCENES = [
-  { id: "chunkurchak", on: "opacity-[0.28]", tone: "" },
+  { id: "chunkurchak", on: "opacity-[0.36]", tone: "" },
   // Красный тундук яркий — приглушаем сильнее остальных.
-  { id: "ethno", on: "opacity-[0.15]", tone: "saturate-[0.6]" },
-  { id: "talkan", on: "opacity-[0.2]", tone: "" },
+  { id: "ethno", on: "opacity-[0.15]", tone: "saturate-[0.65]" },
+  { id: "talkan", on: "opacity-[0.26]", tone: "" },
 ] as const;
 
 function greeting(): string {
@@ -75,13 +75,13 @@ export default function Home() {
             className={`absolute inset-0 h-full w-full object-cover ${s.tone} transition-opacity duration-1000 ${scene === s.id ? s.on : "opacity-0"}`}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-b from-paper/70 via-paper/20 to-paper/85" />
+        <div className="absolute inset-0 bg-gradient-to-b from-paper/60 via-paper/10 to-paper/80" />
       </div>
 
       <header className="fixed inset-x-0 top-0 z-30 flex items-center justify-between bg-gradient-to-b from-paper via-paper/80 to-transparent px-5 pb-6 pt-4 md:px-8">
         <div className="flex items-center gap-2.5">
           <BrandMark />
-          <span className="text-[15px] font-medium tracking-wide text-ink">Супара</span>
+          <span className="font-display text-xl text-ink">Супара</span>
         </div>
         {!empty && (
           <button className="btn-ghost" onClick={() => update((s) => ({ ...s, thread: [] }))}>
@@ -91,11 +91,11 @@ export default function Home() {
         )}
       </header>
 
-      <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pb-48 pt-24 md:px-6">
+      <main className="mx-auto flex min-h-screen w-full max-w-[54rem] flex-col px-4 pb-48 pt-24 md:px-6">
         {empty ? (
           <div className="flex flex-1 flex-col items-center justify-center pb-10 text-center">
-            <h1 className="animate-rise text-[clamp(2.4rem,7vw,3.75rem)] font-light leading-[1.05] tracking-tight text-ink">{greeting()}</h1>
-            <p className="mt-4 animate-rise text-base text-muted-100 [animation-delay:80ms]">{statusLine(state)}</p>
+            <h1 className="animate-rise font-display text-[clamp(3rem,8.5vw,5rem)] leading-[1.05] text-ink">{greeting()}</h1>
+            <p className="mt-5 animate-rise text-lg text-muted-100 [animation-delay:80ms]">{statusLine(state)}</p>
           </div>
         ) : (
           <div className="space-y-8">
@@ -104,13 +104,13 @@ export default function Home() {
               if (m.from === "me") {
                 return (
                   <div key={m.id} ref={isLastQuestion ? lastRef : undefined} className="flex scroll-mt-24 justify-end">
-                    <div className="max-w-[85%] rounded-3xl bg-leaf px-5 py-2.5 text-[15px] text-white">{m.text}</div>
+                    <div className="max-w-[85%] rounded-full border border-bronze/25 bg-bronze/15 px-6 py-2.5 text-[17px] text-ink backdrop-blur-xl">{m.text}</div>
                   </div>
                 );
               }
               return (
                 <div key={m.id} className="space-y-4">
-                  <p className="animate-rise text-[1.35rem] font-light leading-snug tracking-tight text-ink">{m.text}</p>
+                  <p className="animate-rise font-display text-[1.75rem] leading-snug text-ink">{m.text}</p>
                   {m.view && <ViewCard view={m.view} />}
                 </div>
               );
@@ -120,10 +120,10 @@ export default function Home() {
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-30 bg-gradient-to-t from-paper via-paper/95 to-transparent px-4 pb-3 pt-10 md:px-6">
-        <div className="mx-auto w-full max-w-3xl">
+        <div className="mx-auto w-full max-w-[54rem]">
           <div className="mb-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] md:flex-wrap md:justify-center">
             {PROMPTS.map((p) => (
-              <button key={p} onClick={() => ask(p)} className="btn-ghost shrink-0">
+              <button key={p} onClick={() => ask(p)} className="btn-ghost shrink-0 px-4 py-2 text-sm">
                 {p}
               </button>
             ))}
@@ -133,20 +133,20 @@ export default function Home() {
               e.preventDefault();
               ask(text);
             }}
-            className="flex items-center gap-2 rounded-full bg-white py-2 pl-6 pr-2 shadow-soft ring-1 ring-inset ring-black/[0.06] transition focus-within:ring-leaf/40"
+            className="flex items-center gap-2 rounded-full border border-white/80 bg-white/55 py-2 pl-7 pr-2 shadow-[0_16px_50px_rgba(60,40,20,0.12)] backdrop-blur-2xl transition focus-within:bg-white/80"
           >
             <input
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Спросите координатора"
               aria-label="Запрос координатору"
-              className="min-w-0 flex-1 bg-transparent py-2 text-base text-ink outline-none placeholder:text-muted-300"
+              className="min-w-0 flex-1 bg-transparent py-2.5 text-[17px] text-ink outline-none placeholder:text-muted-300"
             />
             <button
               type="submit"
               aria-label="Отправить"
               disabled={!text.trim()}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-leaf text-white transition hover:bg-leaf-dark disabled:bg-black/[0.06] disabled:text-muted-300"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-bronze text-white transition hover:bg-bronze-dark disabled:bg-black/[0.06] disabled:text-muted-300"
             >
               <ArrowUp size={18} />
             </button>

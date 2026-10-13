@@ -136,7 +136,7 @@ function Summary() {
         {load.map(({ day, busy }) => (
           <div key={day} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
             <span
-              className={`w-full rounded-md ${busy ? (isWeekend(day) ? "bg-accent" : "bg-leaf/60") : "bg-black/10"}`}
+              className={`w-full rounded-md ${busy ? (isWeekend(day) ? "bg-bronze" : "bg-bronze/40") : "bg-black/10"}`}
               style={{ height: `${Math.max(6, (busy / Math.max(1, s.total)) * 100)}%` }}
             />
             <span className={`text-[10px] ${day === today ? "font-semibold text-ink" : "text-muted-300"}`}>{fromISO(day).getDate()}</span>
@@ -148,11 +148,11 @@ function Summary() {
         <div className="mt-6 border-t border-black/[0.06] pt-2">
           <Rows>
             {moves.map((m) => (
-              <li key={m.key} className="flex items-center justify-between gap-3 py-3 text-[15px]">
+              <li key={m.key} className="flex items-center justify-between gap-3 py-3 text-[17px]">
                 <span className="min-w-0 truncate text-ink">
                   {m.unit} <span className="text-muted-200">· {m.guest}</span>
                 </span>
-                <span className="text-sm text-muted-200">{m.kind}</span>
+                <span className="text-[15px] text-muted-200">{m.kind}</span>
               </li>
             ))}
           </Rows>
@@ -180,8 +180,8 @@ function Requests() {
         {items.map((i) => (
           <li key={i.booking.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5">
             <div className="min-w-[160px] flex-1">
-              <div className="text-[15px] text-ink">{i.guest}</div>
-              <div className="text-sm text-muted-200">
+              <div className="text-[17px] text-ink">{i.guest}</div>
+              <div className="text-[15px] text-muted-200">
                 {i.unit} · {formatRange(i.booking.from, i.booking.to)} · {formatSom(i.booking.total)}
               </div>
             </div>
@@ -210,18 +210,18 @@ function Tasks() {
             <button
               onClick={() => update((s) => ({ ...s, tasks: s.tasks.map((x) => (x.id === t.id ? { ...x, done: true } : x)) }))}
               aria-label="Отметить выполненной"
-              className="grid h-6 w-6 shrink-0 place-items-center rounded-full ring-1 ring-inset ring-black/25 text-transparent transition hover:bg-leaf hover:text-white"
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-full ring-1 ring-inset ring-black/25 text-transparent transition hover:bg-bronze hover:text-white"
             >
               <Check size={13} strokeWidth={3} />
             </button>
             <div className="min-w-0 flex-1">
-              <div className="text-[15px] text-ink">{t.title}</div>
-              <div className="text-sm text-muted-200">{t.assignee}</div>
+              <div className="text-[17px] text-ink">{t.title}</div>
+              <div className="text-[15px] text-muted-200">{t.assignee}</div>
             </div>
-            <span className={`text-sm ${t.due < today ? "text-felt" : "text-muted-200"}`}>{t.due < today ? "просрочено" : formatDay(t.due)}</span>
+            <span className={`text-[15px] ${t.due < today ? "text-felt" : "text-muted-200"}`}>{t.due < today ? "просрочено" : formatDay(t.due)}</span>
           </li>
         ))}
-        {open.length === 0 && <li className="py-3.5 text-[15px] text-muted-200">Все задачи выполнены</li>}
+        {open.length === 0 && <li className="py-3.5 text-[17px] text-muted-200">Все задачи выполнены</li>}
       </Rows>
       <div className="flex justify-end border-t border-black/[0.06] pt-3">
         <button className="btn-ghost" onClick={() => update(operationsRound)}>
@@ -238,12 +238,12 @@ function Bars({ rows }: { rows: { label: string; value: number; note: string }[]
     <ul className="space-y-4">
       {rows.map((r) => (
         <li key={r.label}>
-          <div className="mb-1.5 flex items-baseline justify-between gap-4 text-[15px]">
+          <div className="mb-1.5 flex items-baseline justify-between gap-4 text-[17px]">
             <span className="text-ink">{r.label}</span>
             <span className="text-muted-200">{r.note}</span>
           </div>
           <span className="block h-1.5 overflow-hidden rounded-full bg-black/[0.07]">
-            <span className="block h-full rounded-full bg-leaf" style={{ width: `${(r.value / max) * 100}%` }} />
+            <span className="block h-full rounded-full bg-bronze" style={{ width: `${(r.value / max) * 100}%` }} />
           </span>
         </li>
       ))}
@@ -297,8 +297,8 @@ function Free({ from, to }: { from: string; to: string }) {
           return (
             <li key={kind} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5">
               <div className="min-w-[160px] flex-1">
-                <div className="text-[15px] text-ink">{kind}</div>
-                <div className="text-sm text-muted-200">
+                <div className="text-[17px] text-ink">{kind}</div>
+                <div className="text-[15px] text-muted-200">
                   свободно {units.length} · до {unit.capacity} гостей · {formatSom(unit.price * nights)}
                 </div>
               </div>
@@ -335,14 +335,14 @@ function Team() {
           key={a.id}
           disabled={a.id === "coordinator"}
           onClick={() => ask(a.name)}
-          className="group rounded-3xl bg-white/85 p-4 text-left shadow-soft ring-1 ring-inset ring-black/[0.04] backdrop-blur-md transition enabled:hover:bg-white"
+          className="group rounded-3xl border border-white/70 bg-white/50 p-5 text-left shadow-[0_12px_40px_rgba(60,40,20,0.08)] backdrop-blur-2xl transition enabled:hover:bg-white/75"
         >
           <div className="flex items-center justify-between">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            <ArrowUpRight size={15} className="text-muted-400 transition group-enabled:group-hover:text-leaf" />
+            <span className="h-2 w-2 rounded-full bg-[#C9A35C]" />
+            <ArrowUpRight size={15} className="text-muted-400 transition group-enabled:group-hover:text-bronze" />
           </div>
-          <div className="mt-5 text-[15px] text-ink">{a.name}</div>
-          <div className="mt-0.5 text-sm text-muted-200">{load[a.id]}</div>
+          <div className="mt-5 text-[17px] text-ink">{a.name}</div>
+          <div className="mt-0.5 text-[15px] text-muted-200">{load[a.id]}</div>
         </button>
       ))}
     </div>
@@ -384,12 +384,12 @@ function Marketing() {
         }))}
       />
       {state.campaigns.map((c) => (
-        <div key={c.id} className="mt-6 rounded-2xl bg-sand p-4">
-          <div className="flex items-baseline justify-between gap-3 text-sm text-muted-200">
+        <div key={c.id} className="mt-6 rounded-2xl bg-white/60 p-4">
+          <div className="flex items-baseline justify-between gap-3 text-[15px] text-muted-200">
             <span>{c.title}</span>
             <span>получателей: {c.audience}</span>
           </div>
-          <div className="mt-2 text-[15px] leading-relaxed text-ink">{c.text}</div>
+          <div className="mt-2 text-[17px] leading-relaxed text-ink">{c.text}</div>
         </div>
       ))}
       <div className="mt-6 flex justify-end">
@@ -411,12 +411,12 @@ function MarketView() {
           <li key={i.url}>
             <a href={i.url} target="_blank" rel="noopener" className="group flex items-start justify-between gap-4 py-3.5">
               <span className="min-w-0">
-                <span className="block text-[15px] text-ink group-hover:text-leaf">{i.title}</span>
-                <span className="text-sm text-muted-200">
+                <span className="block text-[17px] text-ink group-hover:text-bronze">{i.title}</span>
+                <span className="text-[15px] text-muted-200">
                   {i.source} · {shortDate(i.date)}
                 </span>
               </span>
-              <ArrowUpRight size={16} className="mt-1 shrink-0 text-muted-400 group-hover:text-leaf" />
+              <ArrowUpRight size={16} className="mt-1 shrink-0 text-muted-400 group-hover:text-bronze" />
             </a>
           </li>
         ))}
@@ -437,8 +437,8 @@ function Sales() {
             <li key={i.booking.id} className="py-3.5">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <div className="min-w-[160px] flex-1">
-                  <div className="text-[15px] text-ink">{i.guest}</div>
-                  <div className="text-sm text-muted-200">
+                  <div className="text-[17px] text-ink">{i.guest}</div>
+                  <div className="text-[15px] text-muted-200">
                     {i.unit} · {formatRange(i.booking.from, i.booking.to)} · {i.kind === "request" ? "заявка" : `долг ${formatSom(i.due)}`}
                   </div>
                 </div>
@@ -448,7 +448,7 @@ function Sales() {
                   </button>
                 )}
               </div>
-              {message && <div className="mt-3 rounded-2xl bg-sand p-4 text-[15px] leading-relaxed text-ink">{message.text}</div>}
+              {message && <div className="mt-3 rounded-2xl bg-white/60 p-4 text-[17px] leading-relaxed text-ink">{message.text}</div>}
             </li>
           );
         })}
@@ -487,8 +487,8 @@ function AdviceView() {
           return (
             <li key={a.title} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5">
               <div className="min-w-[200px] flex-1">
-                <div className="text-[15px] text-ink">{a.title}</div>
-                <div className="text-sm text-muted-200">{a.text}</div>
+                <div className="text-[17px] text-ink">{a.title}</div>
+                <div className="text-[15px] text-muted-200">{a.text}</div>
               </div>
               {next && (
                 <button className="btn-ghost" onClick={() => ask(next)}>
@@ -513,13 +513,13 @@ function Guests() {
           return (
             <li key={g.id} className="flex items-center justify-between gap-4 py-3.5">
               <div className="min-w-0">
-                <div className="text-[15px] text-ink">{g.name}</div>
-                <div className="truncate text-sm text-muted-200">
+                <div className="text-[17px] text-ink">{g.name}</div>
+                <div className="truncate text-[15px] text-muted-200">
                   {g.phone}
                   {g.tags.length ? ` · ${g.tags.join(", ")}` : ""}
                 </div>
               </div>
-              <span className="shrink-0 text-sm text-muted-200">визитов: {visits}</span>
+              <span className="shrink-0 text-[15px] text-muted-200">визитов: {visits}</span>
             </li>
           );
         })}
@@ -550,8 +550,8 @@ function GuestBot() {
         {state.chat.map((m) => (
           <div key={m.id} className={`flex ${m.from === "guest" ? "justify-end" : "justify-start"}`}>
             <div
-              className={`max-w-[85%] whitespace-pre-line rounded-3xl px-4 py-2.5 text-[15px] leading-relaxed ${
-                m.from === "guest" ? "bg-leaf text-white" : "bg-sand text-ink"
+              className={`max-w-[85%] whitespace-pre-line rounded-3xl px-4 py-2.5 text-[17px] leading-relaxed ${
+                m.from === "guest" ? "bg-bronze text-white" : "bg-white/60 text-ink"
               }`}
             >
               {m.text}
@@ -559,12 +559,12 @@ function GuestBot() {
           </div>
         ))}
       </div>
-      <form onSubmit={send} className="mt-4 flex items-center gap-2 rounded-full bg-sand py-1.5 pl-5 pr-1.5">
+      <form onSubmit={send} className="mt-4 flex items-center gap-2 rounded-full bg-white/60 py-1.5 pl-5 pr-1.5">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Хочу юрту с 20 по 22, нас четверо"
-          className="min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-muted-300"
+          className="min-w-0 flex-1 bg-transparent text-[17px] text-ink outline-none placeholder:text-muted-300"
         />
         <button type="submit" aria-label="Отправить" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/[0.06] text-ink hover:bg-black/10">
           <Send size={15} />
@@ -590,14 +590,14 @@ function Group() {
   return (
     <div className="grid animate-rise gap-3 sm:grid-cols-3">
       {tiles.map((x) => (
-        <button key={x.name} onClick={() => ask(x.name)} className="card group p-5 text-left transition hover:bg-white">
-          <div className="flex items-center justify-between text-[15px] text-ink">
+        <button key={x.name} onClick={() => ask(x.name)} className="card group p-6 text-left transition hover:bg-white/75">
+          <div className="flex items-center justify-between text-[17px] text-ink">
             {x.name}
-            <ArrowUpRight size={16} className="text-muted-400 transition group-hover:text-leaf" />
+            <ArrowUpRight size={16} className="text-muted-400 transition group-hover:text-bronze" />
           </div>
           <div className="figure mt-6">{x.figure}</div>
           <div className="label-kicker mt-2">{x.label}</div>
-          <div className="mt-4 text-sm text-muted-200">{x.note}</div>
+          <div className="mt-4 text-[15px] text-muted-200">{x.note}</div>
         </button>
       ))}
     </div>
@@ -605,22 +605,22 @@ function Group() {
 }
 
 const RESERVATION_CHIP: Record<ReservationStatus, string> = {
-  request: "bg-amber-100 text-amber-800",
-  confirmed: "bg-emerald-100 text-emerald-800",
-  done: "bg-stone-200 text-stone-600",
-  cancelled: "bg-red-100 text-red-800",
+  request: "bg-[#F6E9CC] text-[#6E5210]",
+  confirmed: "bg-[#EBDCCD] text-[#5F4027]",
+  done: "bg-[#E9E4DC] text-[#857B6F]",
+  cancelled: "bg-[#F3D5CB] text-[#8A2E17]",
 };
 
 function ReservationRow({ r, withDate }: { r: Reservation; withDate?: boolean }) {
   const { state, update } = useStore();
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5">
-      <span className="w-[4.5rem] shrink-0 text-[15px] tabular-nums text-ink">{withDate ? formatDay(r.date) : r.time}</span>
+      <span className="w-[4.5rem] shrink-0 text-[17px] tabular-nums text-ink">{withDate ? formatDay(r.date) : r.time}</span>
       <div className="min-w-[160px] flex-1">
-        <div className="text-[15px] text-ink">
+        <div className="text-[17px] text-ink">
           {hallName(state, r.hallId)} <span className="text-muted-200">· {r.people} гостей</span>
         </div>
-        <div className="text-sm text-muted-200">
+        <div className="text-[15px] text-muted-200">
           {r.guest}
           {r.kind === "Банкет" ? ` · банкет ${formatSom(r.total)}, внесено ${formatSom(r.prepaid)}` : ""}
         </div>
@@ -672,10 +672,10 @@ function Ethno() {
 }
 
 const ORDER_CHIP: Record<OrderStatus, string> = {
-  new: "bg-amber-100 text-amber-800",
-  production: "bg-sky-100 text-sky-800",
-  ready: "bg-emerald-100 text-emerald-800",
-  delivered: "bg-stone-200 text-stone-600",
+  new: "bg-[#F6E9CC] text-[#6E5210]",
+  production: "bg-[#E6BFA8] text-[#6A2F18]",
+  ready: "bg-[#EBDCCD] text-[#5F4027]",
+  delivered: "bg-[#E9E4DC] text-[#857B6F]",
 };
 
 function Talkan() {
@@ -698,10 +698,10 @@ function Talkan() {
             return (
               <li key={o.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5">
                 <div className="min-w-[170px] flex-1">
-                  <div className="text-[15px] text-ink">
+                  <div className="text-[17px] text-ink">
                     {o.customer} <span className="text-muted-200">· {o.boxes} наборов, {o.packaging.toLowerCase()}</span>
                   </div>
-                  <div className={`text-sm ${late ? "text-felt" : "text-muted-200"}`}>
+                  <div className={`text-[15px] ${late ? "text-felt" : "text-muted-200"}`}>
                     к {formatDay(o.due)} · {formatSom(o.total)}
                     {o.paid < o.total ? ` · оплачено ${formatSom(o.paid)}` : " · оплачен"}
                   </div>

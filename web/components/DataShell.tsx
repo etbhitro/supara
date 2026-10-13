@@ -97,7 +97,7 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 }
 
 export const inputCls =
-  "w-full rounded-2xl border border-black/10 bg-black/[0.04] px-4 py-3 text-sm text-ink placeholder:text-muted-300 outline-none transition focus:border-leaf focus:ring-2 focus:ring-leaf/15";
+  "w-full rounded-2xl border border-black/10 bg-black/[0.04] px-4 py-3 text-sm text-ink placeholder:text-muted-300 outline-none transition focus:border-bronze focus:ring-2 focus:ring-bronze/15";
 
 export function NoAccess({ what }: { what: string }) {
   return <EmptyState title={`Для этой роли раздел «${what}» закрыт`} hint="Смените роль в меню, чтобы посмотреть." />;

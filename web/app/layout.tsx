@@ -1,11 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Onest } from "next/font/google";
+import { Golos_Text, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store";
 
-const onest = Onest({
+// Текст — Golos (сделан под кириллицу), заголовки и крупные цифры — Playfair Display.
+const sans = Golos_Text({
   subsets: ["latin", "cyrillic"],
-  variable: "--font-onest",
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const display = Playfair_Display({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-display",
   display: "swap",
 });
 
@@ -22,7 +29,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={onest.variable}>
+    <html lang="ru" className={`${sans.variable} ${display.variable}`}>
       <body className="min-h-screen font-sans antialiased">
         <StoreProvider>{children}</StoreProvider>
       </body>

@@ -5,17 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Светлая тёплая тема: бумага, песок, зелень гор и немного мёда.
+        // Светлая тёплая тема: слоновая кость, эспрессо и бронза.
         paper: "#FBF7F0",
         sand: {
           DEFAULT: "#F4EEE4",
           deep: "#EAE1D3",
         },
-        ink: "#2B2620",
-        leaf: {
-          DEFAULT: "#2F7D5C",
-          dark: "#27694D",
-          soft: "#E2F0E8",
+        ink: "#2A211B",
+        // Бронза: единственный цвет действия. Дружит с красным тундуком, шоколадом и зеленью гор.
+        bronze: {
+          DEFAULT: "#A47148",
+          dark: "#8A5C38",
+          soft: "#F3E6D8",
         },
         accent: {
           DEFAULT: "#E3A63B",
@@ -35,7 +36,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["var(--font-onest)", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
       },
       boxShadow: {
         soft: "0 1px 2px rgba(70, 50, 20, 0.04), 0 12px 32px rgba(70, 50, 20, 0.07)",

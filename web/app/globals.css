@@ -9,7 +9,7 @@
 
   /* У body нет заливки: под ним лежит слой с фото. */
   body {
-    @apply text-ink antialiased;
+    @apply text-[17px] text-ink antialiased;
   }
 
   *,
@@ -19,7 +19,7 @@
   }
 
   ::selection {
-    background: rgba(47, 125, 92, 0.2);
+    background: rgba(164, 113, 72, 0.22);
   }
 
   ::-webkit-scrollbar {
@@ -30,35 +30,42 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(43, 38, 32, 0.15);
+    background: rgba(42, 33, 27, 0.15);
     border-radius: 3px;
   }
 }
 
 @layer components {
+  /* Главное действие: бронзовое стекло с мягким свечением. */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-leaf px-5 py-2.5 text-sm font-medium text-white transition hover:bg-leaf-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/30 bg-bronze/85 px-6 py-2.5 text-[15px] font-medium text-white shadow-[0_8px_24px_rgba(164,113,72,0.3)] backdrop-blur-xl transition hover:bg-bronze active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none;
   }
 
+  /* Остальные кнопки: матовое стекло. */
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-full bg-white/80 px-4 py-2 text-[13px] font-medium text-ink shadow-[0_1px_2px_rgba(70,50,20,0.08)] ring-1 ring-inset ring-black/[0.05] transition hover:bg-white active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full border border-white/70 bg-white/40 px-5 py-2.5 text-[15px] font-medium text-ink shadow-[0_2px_12px_rgba(60,40,20,0.06)] backdrop-blur-xl transition hover:bg-white/70 active:scale-[0.98];
   }
 
   .label-kicker {
-    @apply text-[13px] font-medium text-muted-200;
+    @apply text-[15px] text-muted-200;
   }
 
-  /* Карточка полупрозрачная: фото на фоне чуть угадывается и под ней. */
+  /* Карточка из матового стекла: фото на фоне просвечивает и под ней. */
   .card {
-    @apply rounded-[28px] bg-white/85 p-6 shadow-soft ring-1 ring-inset ring-black/[0.04] backdrop-blur-md;
+    @apply rounded-[32px] border border-white/70 bg-white/55 p-7 shadow-[0_24px_70px_rgba(60,40,20,0.1)] backdrop-blur-2xl;
   }
 
   .chip {
-    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-[13px] font-medium;
   }
 
-  /* Крупные цифры: тонкие, без жирности. */
+  /* У антиквы по умолчанию «старинные» цифры разной высоты — включаем ровные. */
+  .font-display {
+    font-variant-numeric: lining-nums;
+  }
+
+  /* Крупные цифры — антиквой. */
   .figure {
-    @apply text-[2.5rem] font-light leading-none tracking-tight text-ink;
+    @apply font-display text-[3.1rem] leading-none text-ink;
   }
 }
