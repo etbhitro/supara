@@ -10,7 +10,7 @@ import { addDays, nightsBetween, todayISO } from "./format";
 export type Role = "owner" | "manager" | "reception" | "staff";
 export type LocationId = "chunkurchak" | "ethno" | "talkan";
 export type BookingStatus = "request" | "confirmed" | "checked_in" | "checked_out" | "cancelled";
-export type AgentId = "guest_admin" | "operations" | "analyst";
+export type AgentId = "coordinator" | "guest_admin" | "sales" | "operations" | "analyst";
 
 export interface Unit {
   id: string;
@@ -68,6 +68,14 @@ export interface ChatMessage {
   text: string;
 }
 
+// Сообщение гостю, которое подготовил сотрудник по продажам.
+export interface Reminder {
+  id: string;
+  bookingId: string;
+  at: string;
+  text: string;
+}
+
 // Что гостевой бот уже выяснил в текущем диалоге.
 export interface ChatSession {
   from?: string;
@@ -87,6 +95,8 @@ export interface State {
   logs: AgentLog[];
   chat: ChatMessage[];
   session: ChatSession;
+  ownerChat: ChatMessage[];
+  reminders: Reminder[];
 }
 
 export const ROLE_LABEL: Record<Role, string> = {
@@ -209,6 +219,8 @@ function seed(today: string): State {
       { id: "c0", from: "bot", text: "Саламатсызбы! Я бот центра отдыха «Супара-Чункурчак». Подскажу цены, проверю свободные даты и приму заявку на бронь." },
     ],
     session: {},
+    ownerChat: [{ id: "o0", from: "bot", text: "На связи. Что посмотреть?" }],
+    reminders: [],
   };
 }
 
@@ -314,7 +326,7 @@ export function addPayment(state: State, bookingId: string, amount: number): Sta
   };
 }
 
-const KEY = "supara-mvp-v1";
+const KEY = "supara-mvp-v3";
 
 interface Store {
   state: State;

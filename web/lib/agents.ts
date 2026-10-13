@@ -9,6 +9,7 @@ import {
   log,
   uid,
   type AgentId,
+  type Booking,
   type ChatSession,
   type State,
   type Task,
@@ -16,27 +17,26 @@ import {
 } from "./store";
 
 export interface AgentInfo {
-  id: string;
+  id: AgentId;
   name: string;
   does: string;
   live: boolean;
 }
 
 export const AGENTS: AgentInfo[] = [
-  { id: "guest_admin", name: "Агент-администратор", does: "Отвечает гостям по ценам и свободным датам, принимает заявки на бронь. Бронь подтверждает человек.", live: true },
-  { id: "operations", name: "Агент по операциям", does: "Ставит задачи персоналу (уборка после выезда), следит за просрочками.", live: true },
-  { id: "analyst", name: "Агент-аналитик", does: "Собирает утренний отчёт: загрузка, заезды и выезды, деньги, что требует внимания.", live: true },
-  { id: "sales", name: "Агент по продажам", does: "Дожимает неоплаченные заявки, возвращает гостей, предлагает допуслуги.", live: false },
-  { id: "purchasing", name: "Агент по закупкам", does: "Следит за остатками, формирует заявки поставщикам.", live: false },
-  { id: "reputation", name: "Агент по репутации", does: "Собирает отзывы, готовит ответы, сообщает о негативе.", live: false },
-  { id: "quality", name: "Агент качества сервиса", does: "Разбирает звонки по чек-листу, даёт советы сотрудникам.", live: false },
-  { id: "coordinator", name: "Координатор", does: "Принимает запросы владельца и распределяет их между агентами.", live: false },
+  { id: "coordinator", name: "Координатор", does: "Отвечает владельцу на вопросы по данным", live: true },
+  { id: "guest_admin", name: "Администратор", does: "Отвечает гостям, принимает заявки", live: true },
+  { id: "sales", name: "Продажи", does: "Доводит заявки и долги до оплаты", live: true },
+  { id: "operations", name: "Операции", does: "Ставит задачи, следит за сроками", live: true },
+  { id: "analyst", name: "Аналитик", does: "Сводки и советы", live: true },
 ];
 
 export const AGENT_NAME: Record<AgentId, string> = {
-  guest_admin: "Агент-администратор",
-  operations: "Агент по операциям",
-  analyst: "Агент-аналитик",
+  coordinator: "Координатор",
+  guest_admin: "Администратор",
+  sales: "Продажи",
+  operations: "Операции",
+  analyst: "Аналитик",
 };
 
 // ---------- Гостевой бот ----------
@@ -363,4 +363,128 @@ export function adviceFor(state: State): Advice[] {
   }
 
   return out.slice(0, 4);
+}
+
+// ---------- Продажи ----------
+// В работе у продажника: заявки без подтверждения и брони с долгом до заезда.
+
+export interface SalesItem {
+  booking: Booking;
+  guest: string;
+  unit: string;
+  kind: "request" | "debt";
+  due: number;
+  reminded: boolean;
+}
+
+export function salesQueue(state: State): SalesItem[] {
+  return state.bookings
+    .filter((b) => b.status === "request" || (b.status === "confirmed" && b.paid < b.total))
+    .sort((a, b) => a.from.localeCompare(b.from))
+    .map((b) => ({
+      booking: b,
+      guest: state.guests.find((g) => g.id === b.guestId)?.name ?? "Гость",
+      unit: state.units.find((u) => u.id === b.unitId)?.name ?? "объект",
+      kind: b.status === "request" ? ("request" as const) : ("debt" as const),
+      due: b.total - b.paid,
+      reminded: state.reminders.some((r) => r.bookingId === b.id),
+    }));
+}
+
+// Готовит сообщение гостю. Отправку подтверждает человек.
+export function prepareReminder(state: State, bookingId: string): State {
+  const item = salesQueue(state).find((i) => i.booking.id === bookingId);
+  if (!item || item.reminded) return state;
+  const b = item.booking;
+  const name = item.guest.split(" ")[0];
+  const text =
+    item.kind === "request"
+      ? `Здравствуйте, ${name}! Ваша заявка на ${item.unit}, ${formatRange(b.from, b.to)}, ждёт подтверждения. Внесите предоплату, и мы закрепим бронь за вами.`
+      : `Здравствуйте, ${name}! Ждём вас ${formatDay(b.from)} (${item.unit}). Напоминаем об остатке ${formatSom(item.due)} — его можно внести до заезда.`;
+  const next: State = {
+    ...state,
+    reminders: [{ id: uid("r"), bookingId, at: new Date().toISOString(), text }, ...state.reminders],
+  };
+  const what = item.kind === "request" ? "подтверждение заявки" : `остаток ${formatSom(item.due)}`;
+  return log(next, "sales", `Подготовил сообщение гостю ${item.guest}: ${what}.`);
+}
+
+// ---------- Операции ----------
+// Обход: готовит объекты к ближайшим заездам и поднимает просрочки.
+
+export function operationsRound(state: State): State {
+  const today = todayISO();
+  let next = state;
+  let created = 0;
+  const arrivals = state.bookings.filter((b) => b.status === "confirmed" && b.from >= today && b.from <= addDays(today, 1));
+  for (const b of arrivals) {
+    if (next.tasks.some((t) => t.bookingId === b.id && t.title.startsWith("Подготовить"))) continue;
+    const unit = state.units.find((u) => u.id === b.unitId)?.name ?? "объект";
+    const task: Task = {
+      id: uid("t"),
+      title: `Подготовить ${unit} к заезду`,
+      assignee: "Уборка",
+      due: b.from,
+      done: false,
+      createdBy: "agent",
+      bookingId: b.id,
+    };
+    next = { ...next, tasks: [task, ...next.tasks] };
+    created += 1;
+  }
+  const overdue = next.tasks.filter((t) => !t.done && t.due < today);
+  const parts = [`поставил задач: ${created}`, `просрочено: ${overdue.length}`];
+  if (overdue.length) parts.push(`сообщил управляющему: «${overdue[0].title}»`);
+  return log(next, "operations", `Обход — ${parts.join(", ")}.`);
+}
+
+// ---------- Координатор ----------
+// Отвечает владельцу на вопросы по данным.
+
+export function ownerReply(state: State, raw: string): string {
+  const text = raw.toLowerCase().replace(/ё/g, "е");
+  const today = todayISO();
+  const s = summarize(state);
+
+  if (/совет|делать|внимани|проблем/.test(text)) {
+    const adv = adviceFor(state);
+    return adv.length ? adv.map((a) => `• ${a.title}. ${a.text}`).join("\n") : "Всё по плану.";
+  }
+  if (/заработ|выручк|оплач|оплат|деньг|доход|долг|доплат/.test(text)) {
+    return `Получено оплат: ${formatSom(s.paidTotal)}. К доплате: ${formatSom(s.dueTotal)}.`;
+  }
+  if (/задач|просроч/.test(text)) {
+    const open = state.tasks.filter((t) => !t.done);
+    const overdue = open.filter((t) => t.due < today);
+    const list = overdue.map((t) => `• ${t.title} (${t.assignee})`).join("\n");
+    return `Открыто задач: ${open.length}, просрочено: ${overdue.length}.${list ? `\n${list}` : ""}`;
+  }
+  if (/заявк/.test(text)) {
+    const q = salesQueue(state).filter((i) => i.kind === "request");
+    if (!q.length) return "Заявок без подтверждения нет.";
+    return `Заявок без подтверждения: ${q.length}.\n${q.map((i) => `• ${i.guest}: ${i.unit}, ${formatRange(i.booking.from, i.booking.to)}`).join("\n")}`;
+  }
+  if (/заезд|выезд|заезжа|выезжа/.test(text)) {
+    const a = s.arrivals.map((x) => `${x.unit} (${x.guest})`).join(", ") || "нет";
+    const d = s.departures.map((x) => `${x.unit} (${x.guest})`).join(", ") || "нет";
+    return `Заезды: ${a}.\nВыезды: ${d}.`;
+  }
+  if (/гост|постоянн|клиент/.test(text)) {
+    const regulars = state.guests.filter((g) => g.tags.includes("постоянный")).length;
+    return `Гостей в базе: ${state.guests.length}, постоянных: ${regulars}.`;
+  }
+  if (/загруз|занят/.test(text)) {
+    return `Сегодня занято ${s.occupiedToday} из ${s.total}. Загрузка на 7 дней: ${Math.round(s.occupancyWeek * 100)}%.`;
+  }
+  const dates = parseDates(text, today);
+  if (/свобод|мест/.test(text) || dates) {
+    const from = dates?.from ?? today;
+    const to = dates?.to ?? addDays(today, 1);
+    const free = freeUnits(state, from, to);
+    const byKind = new Map<string, number>();
+    for (const u of free) byKind.set(u.kind, (byKind.get(u.kind) ?? 0) + 1);
+    const list = [...byKind.entries()].map(([k, n]) => `${k}: ${n}`).join(", ");
+    return `${formatRange(from, to)} свободно ${free.length} из ${state.units.length}${list ? ` (${list})` : ""}.`;
+  }
+  return morningReport(state, true);
 }

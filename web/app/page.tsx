@@ -64,7 +64,7 @@ export default function OverviewPage() {
               <div className="whitespace-pre-line text-sm leading-relaxed text-stone-100">{morningReport(state, showMoney)}</div>
             </Panel>
 
-            <Panel title="Агенты" href={canAgents ? "/agents/" : undefined}>
+            <Panel title="Сотрудники" href={canAgents ? "/agents/" : undefined}>
               <ul className="mb-4 flex flex-wrap gap-1.5">
                 {AGENTS.filter((a) => a.live).map((a) => (
                   <li key={a.id} className="chip bg-emerald-500/15 text-emerald-300">

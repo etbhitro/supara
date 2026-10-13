@@ -17,7 +17,7 @@ const ALL = {
   bookings: { path: "/bookings/", label: "Брони" },
   guests: { path: "/guests/", label: "Гости" },
   tasks: { path: "/tasks/", label: "Задачи" },
-  agents: { path: "/agents/", label: "AI-агенты" },
+  agents: { path: "/agents/", label: "Сотрудники" },
 } satisfies Record<string, NavItem>;
 
 // Кто что видит (ТЗ, раздел 2). Персонал — только свои задачи.
