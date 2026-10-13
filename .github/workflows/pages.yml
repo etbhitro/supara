@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Парсер рынка: пересобираем сайт со свежими новостями четыре раза в сутки.
+  schedule:
+    - cron: "20 */6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -26,6 +29,9 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
         working-directory: web
+      - run: node scripts/parse-market.mjs
+        working-directory: web
+        continue-on-error: true
       - run: npm run build
         working-directory: web
         env:

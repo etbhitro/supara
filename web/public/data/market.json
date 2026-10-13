@@ -1,0 +1,79 @@
+{
+ "fetchedAt": "2026-10-13T04:38:02.112Z",
+ "sources": [
+  {
+   "name": "24.kg",
+   "read": 50,
+   "matched": 1
+  },
+  {
+   "name": "kaktus.media",
+   "read": 20,
+   "matched": 0
+  },
+  {
+   "name": "kabar.kg",
+   "read": 50,
+   "matched": 1
+  },
+  {
+   "name": "economist.kg",
+   "read": 0,
+   "matched": 0
+  },
+  {
+   "name": "sputnik.kg",
+   "read": 100,
+   "matched": 5
+  },
+  {
+   "name": "tourism.gov.kg",
+   "read": 10,
+   "matched": 5
+  }
+ ],
+ "items": [
+  {
+   "title": "\"Ала-Тоо Резортто\" 1,7 чакырым электр кабелдери тартылды",
+   "url": "https://kabar.kg/news/ala-too-rezortto-17-chakyrym-elektr-kabelderi-tartyldy/",
+   "source": "kabar.kg",
+   "date": "2026-10-13T03:35:00.000Z"
+  },
+  {
+   "title": "Местами дожди — погода в Кыргызстане 13 октября",
+   "url": "https://ru.sputnik.kg/20261012/pogoda-kyrgyzstan-13-oktyabr-1104246791.html",
+   "source": "sputnik.kg",
+   "date": "2026-10-12T13:15:00.000Z"
+  },
+  {
+   "title": "Дожди, в горах снег — погода в Кыргызстане 12 октября",
+   "url": "https://ru.sputnik.kg/20261011/-pogoda-kyrgyzstan-12-oktyabrya-1104226607.html",
+   "source": "sputnik.kg",
+   "date": "2026-10-11T13:36:00.000Z"
+  },
+  {
+   "title": "Преимущественно без осадков — погода в Кыргызстане 11 октября",
+   "url": "https://ru.sputnik.kg/20261010/-pogoda-v-kyrgyzstane-11-oktyabrya-1104208934.html",
+   "source": "sputnik.kg",
+   "date": "2026-10-10T13:15:00.000Z"
+  },
+  {
+   "title": "Погода в Кыргызстане 10 октября",
+   "url": "https://ru.sputnik.kg/20261009/pogoda-kyrgyzstan-10-oktyabr-1104196429.html",
+   "source": "sputnik.kg",
+   "date": "2026-10-09T13:15:00.000Z"
+  },
+  {
+   "title": "Дожди — погода в Кыргызстане 9 октября",
+   "url": "https://ru.sputnik.kg/20261008/-pogoda-kyrgyzstane-9-oktyabrya-1104173780.html",
+   "source": "sputnik.kg",
+   "date": "2026-10-08T13:15:00.000Z"
+  },
+  {
+   "title": "Афиша Бишкека на выходные: балет, стендап и выставки",
+   "url": "https://24.kg/obschestvo/391538_afisha_bishkeka_navyihodnyie_balet_stendap_ivyistavki/",
+   "source": "24.kg",
+   "date": "2026-10-02T13:00:00.000Z"
+  }
+ ]
+}

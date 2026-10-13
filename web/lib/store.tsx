@@ -10,7 +10,7 @@ import { addDays, nightsBetween, todayISO } from "./format";
 export type Role = "owner" | "manager" | "reception" | "staff";
 export type LocationId = "chunkurchak" | "ethno" | "talkan";
 export type BookingStatus = "request" | "confirmed" | "checked_in" | "checked_out" | "cancelled";
-export type AgentId = "coordinator" | "guest_admin" | "sales" | "operations" | "analyst";
+export type AgentId = "coordinator" | "guest_admin" | "sales" | "rop" | "marketer" | "parser" | "operations" | "analyst";
 
 export interface Unit {
   id: string;
@@ -76,6 +76,15 @@ export interface Reminder {
   text: string;
 }
 
+// Акция, которую подготовил маркетолог.
+export interface Campaign {
+  id: string;
+  at: string;
+  title: string;
+  text: string;
+  audience: number;
+}
+
 // Что гостевой бот уже выяснил в текущем диалоге.
 export interface ChatSession {
   from?: string;
@@ -97,6 +106,7 @@ export interface State {
   session: ChatSession;
   ownerChat: ChatMessage[];
   reminders: Reminder[];
+  campaigns: Campaign[];
 }
 
 export const ROLE_LABEL: Record<Role, string> = {
@@ -221,6 +231,7 @@ function seed(today: string): State {
     session: {},
     ownerChat: [{ id: "o0", from: "bot", text: "На связи. Что посмотреть?" }],
     reminders: [],
+    campaigns: [],
   };
 }
 
@@ -326,7 +337,7 @@ export function addPayment(state: State, bookingId: string, amount: number): Sta
   };
 }
 
-const KEY = "supara-mvp-v3";
+const KEY = "supara-mvp-v4";
 
 interface Store {
   state: State;

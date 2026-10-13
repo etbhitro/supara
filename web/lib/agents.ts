@@ -27,6 +27,9 @@ export const AGENTS: AgentInfo[] = [
   { id: "coordinator", name: "Координатор", does: "Отвечает владельцу на вопросы по данным", live: true },
   { id: "guest_admin", name: "Администратор", does: "Отвечает гостям, принимает заявки", live: true },
   { id: "sales", name: "Продажи", does: "Доводит заявки и долги до оплаты", live: true },
+  { id: "rop", name: "РОП", does: "Воронка, конверсия, поручения", live: true },
+  { id: "marketer", name: "Маркетолог", does: "Каналы и акции на свободные даты", live: true },
+  { id: "parser", name: "Парсер", does: "Собирает новости рынка", live: true },
   { id: "operations", name: "Операции", does: "Ставит задачи, следит за сроками", live: true },
   { id: "analyst", name: "Аналитик", does: "Сводки и советы", live: true },
 ];
@@ -35,6 +38,9 @@ export const AGENT_NAME: Record<AgentId, string> = {
   coordinator: "Координатор",
   guest_admin: "Администратор",
   sales: "Продажи",
+  rop: "РОП",
+  marketer: "Маркетолог",
+  parser: "Парсер",
   operations: "Операции",
   analyst: "Аналитик",
 };
@@ -487,4 +493,101 @@ export function ownerReply(state: State, raw: string): string {
     return `${formatRange(from, to)} свободно ${free.length} из ${state.units.length}${list ? ` (${list})` : ""}.`;
   }
   return morningReport(state, true);
+}
+
+// ---------- Маркетолог ----------
+// Считает, какой канал приводит гостей и деньги, и готовит акцию на свободные даты.
+
+export interface SourceRow {
+  source: string;
+  bookings: number;
+  requests: number;
+  revenue: number;
+}
+
+export function sourceStats(state: State): SourceRow[] {
+  const rows = new Map<string, SourceRow>();
+  for (const b of state.bookings) {
+    if (b.status === "cancelled") continue;
+    const row = rows.get(b.source) ?? { source: b.source, bookings: 0, requests: 0, revenue: 0 };
+    if (b.status === "request") row.requests += 1;
+    else {
+      row.bookings += 1;
+      row.revenue += b.total;
+    }
+    rows.set(b.source, row);
+  }
+  return [...rows.values()].sort((a, b) => b.revenue - a.revenue);
+}
+
+// Акция на ближайшую субботу: текст и кому отправить. Запуск подтверждает человек.
+export function prepareCampaign(state: State): State {
+  const today = todayISO();
+  const saturday = addDays(today, (6 - fromISO(today).getDay() + 7) % 7);
+  const free = freeUnits(state, saturday, addDays(saturday, 1));
+  if (free.length === 0) return log(state, "marketer", `На ${formatDay(saturday)} всё занято, акция не нужна.`);
+  const kinds = [...new Set(free.map((u) => u.kind.toLowerCase()))].join(", ");
+  const cheapest = Math.min(...free.map((u) => u.price));
+  const regulars = state.guests.filter((g) => g.tags.includes("постоянный"));
+  const audience = regulars.length || state.guests.length;
+  const campaign = {
+    id: uid("m"),
+    at: new Date().toISOString(),
+    title: `Выходные ${formatDay(saturday)}`,
+    text: `Выходные в горах, в 40 км от Бишкека. На ${formatDay(saturday)} в «Супара-Чункурчак» свободны: ${kinds}. От ${formatSom(cheapest)} за ночь. Напишите нам — закрепим за вами лучший вариант.`,
+    audience,
+  };
+  const next: State = { ...state, campaigns: [campaign, ...state.campaigns] };
+  return log(next, "marketer", `Подготовил акцию на ${formatDay(saturday)}: свободно ${free.length}, получателей ${audience}.`);
+}
+
+// ---------- РОП ----------
+// Руководитель продаж: воронка, конверсия и поручения по зависшим гостям.
+
+export interface Funnel {
+  stages: { label: string; count: number }[];
+  conversion: number; // доля заявок, дошедших до брони
+  avgCheck: number;
+  debt: number;
+}
+
+export function funnel(state: State): Funnel {
+  const count = (status: Booking["status"]) => state.bookings.filter((b) => b.status === status).length;
+  const won = state.bookings.filter((b) => b.status === "confirmed" || b.status === "checked_in" || b.status === "checked_out");
+  const all = state.bookings.length;
+  return {
+    stages: [
+      { label: "Заявка", count: count("request") },
+      { label: "Подтверждена", count: count("confirmed") },
+      { label: "Проживает", count: count("checked_in") },
+      { label: "Выехал", count: count("checked_out") },
+      { label: "Отменена", count: count("cancelled") },
+    ],
+    conversion: all ? won.length / all : 0,
+    avgCheck: won.length ? won.reduce((s, b) => s + b.total, 0) / won.length : 0,
+    debt: won.filter((b) => b.status !== "checked_out").reduce((s, b) => s + (b.total - b.paid), 0),
+  };
+}
+
+// Раздаёт администратору звонки по заявкам и долгам, по одному на гостя.
+export function assignCalls(state: State): State {
+  const today = todayISO();
+  let next = state;
+  let created = 0;
+  for (const item of salesQueue(state)) {
+    if (next.tasks.some((t) => t.bookingId === item.booking.id && t.title.startsWith("Позвонить"))) continue;
+    const why = item.kind === "request" ? "подтвердить заявку" : `остаток ${formatSom(item.due)}`;
+    const task: Task = {
+      id: uid("t"),
+      title: `Позвонить: ${item.guest} — ${why}`,
+      assignee: "Администратор",
+      due: today,
+      done: false,
+      createdBy: "agent",
+      bookingId: item.booking.id,
+    };
+    next = { ...next, tasks: [task, ...next.tasks] };
+    created += 1;
+  }
+  return log(next, "rop", `Раздал поручений администратору: ${created}.`);
 }
