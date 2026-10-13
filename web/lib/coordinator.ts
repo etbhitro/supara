@@ -12,7 +12,7 @@ export interface Reply {
 }
 
 // Быстрые запросы под строкой ввода.
-export const PROMPTS = ["Сводка", "Чункурчак", "Этно-комплекс", "Талкан", "Деньги", "Что делать сегодня?", "Команда"];
+export const PROMPTS = ["Сводка", "Диалоги", "Звонки", "Качество", "Устройства", "Деньги", "Что делать?", "Команда"];
 
 function plural(n: number, one: string, few: string, many: string): string {
   const d = n % 10;
@@ -45,6 +45,19 @@ export function route(state: State, raw: string): Reply {
   const today = todayISO();
   const s = summarize(state);
 
+  // Интеграции: каналы, телефония, контроль качества, камеры и датчики
+  if (/диалог|переписк|сообщени|whatsapp|ватсап|вотсап|instagram|инстаграм|телеграм|telegram|inbox/.test(text)) {
+    return { text: "Все каналы в одном окне. Агент отвечает сам, сложное передаёт человеку.", view: { kind: "inbox" } };
+  }
+  if (/звон|телефон|колл|атс/.test(text)) {
+    return { text: "Каждый звонок записан, расшифрован и оценён.", view: { kind: "calls" } };
+  }
+  if (/качеств|рейтинг|оценк|чек-лист/.test(text)) {
+    return { text: "Кто как работает с гостями на этой неделе.", view: { kind: "quality" } };
+  }
+  if (/устройств|камер|датчик|тревог|алерт|охран/.test(text)) {
+    return { text: "24 камеры и датчики на трёх площадках.", view: { kind: "devices" } };
+  }
   if (/что делать|совет|внимани|проблем|аналит/.test(text)) {
     const n = adviceFor(state).length;
     return n ? { text: `${n} ${plural(n, "вопрос требует", "вопроса требуют", "вопросов требуют")} внимания.`, view: { kind: "advice" } } : { text: "Всё идёт по плану." };

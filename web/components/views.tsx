@@ -6,6 +6,7 @@
 import { createContext, useContext, useState } from "react";
 import { ArrowUpRight, Check, Send } from "lucide-react";
 import { BookingBoard, NewBookingDialog, type Draft } from "@/components/BookingBoard";
+import { Calls, Devices, Inbox, Quality } from "@/components/live";
 import {
   AGENTS,
   adviceFor,
@@ -52,6 +53,14 @@ export function ViewCard({ view }: { view: View }) {
   switch (view.kind) {
     case "group":
       return <Group />;
+    case "inbox":
+      return <Inbox />;
+    case "calls":
+      return <Calls />;
+    case "quality":
+      return <Quality />;
+    case "devices":
+      return <Devices />;
     case "ethno":
       return <Ethno />;
     case "talkan":

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Plus } from "lucide-react";
 import { BrandMark } from "@/components/Brand";
+import { NowLine } from "@/components/live";
 import { AskContext, ViewCard } from "@/components/views";
 import { PROMPTS, route, sceneOf, statusLine } from "@/lib/coordinator";
 import { uid, useStore } from "@/lib/store";
@@ -91,11 +92,12 @@ export default function Home() {
         )}
       </header>
 
-      <main className="mx-auto flex min-h-screen w-full max-w-[54rem] flex-col px-4 pb-48 pt-24 md:px-6">
+      <main className="mx-auto flex min-h-screen w-full max-w-[54rem] flex-col px-4 pb-52 pt-24 md:px-6">
         {empty ? (
           <div className="flex flex-1 flex-col items-center justify-center pb-10 text-center">
             <h1 className="animate-rise font-display text-[clamp(3rem,8.5vw,5rem)] leading-[1.05] text-ink [animation-duration:1100ms]">{greeting()}</h1>
             <p className="mt-5 animate-rise text-lg text-muted-100 [animation-delay:900ms]">{statusLine(state)}</p>
+            <NowLine />
           </div>
         ) : (
           <div className="space-y-8">

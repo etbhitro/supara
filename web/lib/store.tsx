@@ -125,6 +125,10 @@ export interface Order {
 // Что координатор разворачивает в ответ на запрос владельца.
 export type View =
   | { kind: "group" }
+  | { kind: "inbox" }
+  | { kind: "calls" }
+  | { kind: "quality" }
+  | { kind: "devices" }
   | { kind: "ethno" }
   | { kind: "talkan" }
   | { kind: "summary" }

@@ -69,3 +69,13 @@
     @apply font-display text-[3.1rem] leading-none text-ink;
   }
 }
+
+/* Живые карточки интеграций: звуковая дорожка звонка и растущие шкалы оценок */
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.22); }
+  50% { transform: scaleY(1); }
+}
+@keyframes grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
